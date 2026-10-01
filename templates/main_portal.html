@@ -1,225 +1,477 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>SMART STUDENT MONITORING SYSTEM</title>
+    <meta charset="UTF-8">
+    <title>Chennai Institute of Technology — Consolidated Gateway</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
         :root {
+            --primary-navy: #0a1c33;
             --primary-gold: #e2b04a;
             --primary-gold-hover: #c6952a;
             --white: #ffffff;
-            --bg-soft: #fcfbf7;
-            --dark: #1a1a1a;
-            --dark-charcoal: #2d2d2d;
-            --glass: rgba(255, 255, 255, 0.85);
-            --glass-border: rgba(226, 176, 74, 0.15);
-            --shadow-soft: 0 30px 60px rgba(0, 0, 0, 0.05);
-            --shadow-hover: 0 40px 85px rgba(226, 176, 74, 0.18);
+            --bg-soft: #f4f6fa;
+            --text-dark: #0f172a;
+            --text-muted: #64748b;
+            --accent-blue: #1d4ed8;
         }
 
         body {
             background-color: var(--bg-soft);
-            font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
-            color: var(--dark);
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            color: var(--text-dark);
             margin: 0;
             padding: 0;
             display: flex;
-            justify-content: center;
-            align-items: center;
             min-height: 100vh;
+            align-items: stretch;
             overflow-x: hidden;
+        }
+
+        /* ── Split Container Layout ────────────────────────────────────────── */
+        .gateway-left {
+            flex: 1.1;
+            background: linear-gradient(135deg, rgba(10, 28, 51, 0.95), rgba(16, 37, 66, 0.92)),
+                        url("{{ url_for('static', filename='images/college_tower.png') }}");
+            background-size: cover;
+            background-position: center;
+            background-blend-mode: overlay;
+            color: var(--white);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 80px;
             position: relative;
         }
 
-        /* Ambient background glow */
-        body::before {
-            content: '';
-            position: absolute;
-            width: 600px;
-            height: 600px;
-            top: -200px;
-            left: -200px;
-            background: radial-gradient(circle, rgba(226, 176, 74, 0.08) 0%, transparent 70%);
-            z-index: -1;
+        .gateway-right {
+            flex: 0.9;
+            background: var(--bg-soft);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
         }
 
-        body::after {
-            content: '';
-            position: absolute;
-            width: 600px;
-            height: 600px;
-            bottom: -200px;
-            right: -200px;
-            background: radial-gradient(circle, rgba(26, 26, 26, 0.03) 0%, transparent 70%);
-            z-index: -1;
+        /* Logo Brand Style */
+        .brand-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 50px;
         }
-
-        .main-container {
-            width: 100%;
-            max-width: 950px;
-            padding: 40px 20px;
-            box-sizing: border-box;
-            animation: fadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        .brand-logo-icon {
+            font-size: 2.2rem;
         }
-
-        .header-section {
-            text-align: center;
-            margin-bottom: 4rem;
-        }
-
-        h1 {
-            font-size: 3rem;
+        .brand-text {
+            font-size: 1.5rem;
             font-weight: 900;
-            color: var(--dark);
-            letter-spacing: -1.5px;
-            margin: 0 0 10px 0;
-            line-height: 1.1;
+            letter-spacing: -0.5px;
+            text-transform: uppercase;
+        }
+        .brand-text span {
+            display: block;
+            font-size: 0.65rem;
+            color: var(--primary-gold);
+            letter-spacing: 2px;
+            font-weight: 500;
+            margin-top: 2px;
         }
 
-        h1 span {
+        .slogan-title {
+            font-size: 2.6rem;
+            font-weight: 800;
+            line-height: 1.2;
+            margin-bottom: 20px;
+            letter-spacing: -1.5px;
+        }
+        .slogan-title span {
             color: var(--primary-gold);
         }
-
-        h3 {
-            font-size: 1.1rem;
-            font-weight: 500;
-            color: #888;
-            margin: 0;
+        .slogan-desc {
+            font-size: 0.95rem;
+            line-height: 1.6;
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 40px;
+            max-width: 480px;
         }
 
-        /* Cards Grid */
-        .portal-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 2rem;
-        }
-
-        .portal-card {
-            background: var(--glass);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid var(--glass-border);
-            border-radius: 35px;
-            padding: 3rem 2.2rem;
-            text-align: center;
-            text-decoration: none;
-            color: inherit;
-            box-shadow: var(--shadow-soft);
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        /* Feature Indicators */
+        .feature-list {
             display: flex;
             flex-direction: column;
+            gap: 24px;
+        }
+        .feature-item {
+            display: flex;
             align-items: center;
-            justify-content: space-between;
-            min-height: 250px;
+            gap: 16px;
         }
-
-        .portal-card:hover {
-            transform: translateY(-8px);
-            box-shadow: var(--shadow-hover);
-            border-color: rgba(226, 176, 74, 0.3);
-        }
-
-        .portal-icon {
-            font-size: 3.5rem;
-            margin-bottom: 1.5rem;
-            transition: transform 0.4s ease;
-        }
-
-        .portal-card:hover .portal-icon {
-            transform: scale(1.15) rotate(5deg);
-        }
-
-        .portal-card h4 {
-            font-size: 1.4rem;
-            font-weight: 800;
-            margin: 0 0 10px 0;
-            color: var(--dark-charcoal);
-        }
-
-        .portal-card p {
-            font-size: 0.9rem;
-            color: #888;
-            font-weight: 500;
-            margin: 0 0 1.5rem 0;
-            line-height: 1.4;
-        }
-
-        .arrow-btn {
-            background: var(--dark);
-            color: var(--white);
-            width: 48px;
-            height: 48px;
-            border-radius: 50%;
+        .feature-icon-wrapper {
+            width: 44px;
+            height: 44px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 1.2rem;
+        }
+        .feature-info h4 {
+            margin: 0;
+            font-size: 0.9rem;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+        .feature-info p {
+            margin: 2px 0 0 0;
+            font-size: 0.82rem;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        /* ── Login Card (Right Pane) ───────────────────────────────────────── */
+        .login-card {
+            background: var(--white);
+            border-radius: 28px;
+            width: 100%;
+            max-width: 480px;
+            padding: 40px;
+            box-shadow: 0 15px 40px rgba(10, 28, 51, 0.06);
+            border: 1px solid rgba(10, 28, 51, 0.04);
+            box-sizing: border-box;
+        }
+
+        .login-card h2 {
+            font-size: 2rem;
+            font-weight: 800;
+            margin: 0 0 6px 0;
+            letter-spacing: -1px;
+            color: var(--primary-navy);
+        }
+        .login-card p.subtitle {
+            font-size: 0.88rem;
+            color: var(--text-muted);
+            margin: 0 0 30px 0;
+            font-weight: 500;
+        }
+
+        .step-label {
+            font-size: 0.8rem;
+            font-weight: 800;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: var(--accent-blue);
+            margin-bottom: 12px;
+            display: block;
+        }
+
+        /* Role Selector Cards */
+        .role-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+
+        .role-card {
+            background: #f8fafc;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 14px;
+            padding: 16px 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+            user-select: none;
+        }
+        .role-card:hover {
+            border-color: var(--primary-gold);
+            background: #fffdf9;
+            transform: translateY(-2px);
+        }
+        .role-card.active {
+            border-color: var(--accent-blue);
+            background: rgba(29, 78, 216, 0.03);
+            box-shadow: 0 0 0 3px rgba(29, 78, 216, 0.1);
+        }
+
+        .role-icon {
+            font-size: 1.6rem;
+            margin-bottom: 6px;
+        }
+        .role-title {
+            font-weight: 750;
+            font-size: 0.82rem;
+            color: var(--primary-navy);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Form Fields */
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            margin-bottom: 20px;
+        }
+        .input-group label {
+            font-weight: 700;
+            font-size: 0.82rem;
+            color: #475569;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .input-group input {
+            background: #f8fafc;
+            border: 1.5px solid #e2e8f0;
+            padding: 12px 16px;
+            border-radius: 12px;
+            font-size: 0.95rem;
+            font-family: inherit;
+            color: var(--primary-navy);
+            outline: none;
             transition: all 0.3s ease;
         }
-
-        .portal-card:hover .arrow-btn {
-            background: var(--primary-gold);
-            color: var(--dark);
+        .input-group input:focus {
+            border-color: var(--accent-blue);
+            background: var(--white);
+            box-shadow: 0 0 0 4px rgba(29, 78, 216, 0.1);
         }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(30px); }
-            to { opacity: 1; transform: translateY(0); }
+        /* Login Button */
+        .login-btn {
+            background: var(--accent-blue);
+            color: var(--white);
+            border: none;
+            width: 100%;
+            padding: 14px;
+            border-radius: 50px;
+            font-size: 0.95rem;
+            font-weight: 700;
+            cursor: pointer;
+            font-family: inherit;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            margin-top: 10px;
+            box-shadow: 0 4px 15px rgba(29, 78, 216, 0.25);
+        }
+        .login-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(29, 78, 216, 0.35);
+            background: #1e40af;
         }
 
-        @media (max-width: 850px) {
-            .portal-grid {
-                grid-template-columns: 1fr;
-                gap: 1.5rem;
+        /* Responsive */
+        @media (max-width: 900px) {
+            body {
+                flex-direction: column;
             }
-            h1 {
-                font-size: 2.3rem;
+            .gateway-left {
+                padding: 40px;
+                min-height: auto;
+            }
+            .gateway-right {
+                padding: 20px;
             }
         }
     </style>
 </head>
 <body>
 
-<div class="main-container">
-    <div class="header-section">
-        <h1>SSMS <span>Intelligence Hub.</span></h1>
-        <h3>Choose Your Access Portal</h3>
-    </div>
-
-    <div class="portal-grid">
-        <!-- Admin Card -->
-        <a class="portal-card" href="{{ url_for('admin.login') }}">
-            <div class="portal-icon">🛡️</div>
-            <div>
-                <h4>Admin Portal</h4>
-                <p>System configuration, analytics upload, index management & drives setup</p>
-            </div>
-            <div class="arrow-btn">→</div>
-        </a>
-
-        <!-- Student Card -->
-        <a class="portal-card" href="{{ url_for('student.login') }}">
-            <div class="portal-icon">🎓</div>
-            <div>
-                <h4>Student Portal</h4>
-                <p>Academic dashboards, course suggestions, exam panels & certificate uploads</p>
-            </div>
-            <div class="arrow-btn">→</div>
-        </a>
-
-        <!-- Company Card -->
-        <a class="portal-card" href="{{ url_for('company.company_login') }}">
-            <div class="portal-icon">🏢</div>
-            <div>
-                <h4>Company Portal</h4>
-                <p>Recruiter access, job postings creation, candidate profiles & eligibility grids</p>
-            </div>
-            <div class="arrow-btn">→</div>
-        </a>
+<!-- Page Preloader -->
+<div id="page-preloader" style="
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #f4f6fa;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 999999;
+    transition: opacity 0.4s ease, visibility 0.4s ease;
+">
+    <div style="text-align: center;">
+        <svg viewBox="0 0 100 105" xmlns="http://www.w3.org/2000/svg" style="
+            width: 80px;
+            height: 80px;
+            color: #e2b04a;
+            animation: pulse-spark 1.8s infinite ease-in-out, preloader-glow 1.8s infinite ease-in-out;
+        ">
+            <!-- Top-Right Spark -->
+            <path d="M 62,8 Q 62,38 92,38 Q 62,38 62,68 Q 62,38 32,38 Q 62,38 62,8 Z" fill="currentColor" />
+            <!-- Bottom-Left Spark -->
+            <path d="M 38,37 Q 38,67 68,67 Q 38,67 38,97 Q 38,67 8,67 Q 38,67 38,37 Z" fill="currentColor" style="opacity: 0.85;" />
+        </svg>
     </div>
 </div>
 
+<style>
+    @keyframes pulse-spark {
+        0%, 100% { transform: scale(0.85) rotate(-8deg); }
+        50% { transform: scale(1.05) rotate(8deg); }
+    }
+    @keyframes preloader-glow {
+        0%, 100% { filter: drop-shadow(0 0 8px rgba(226,176,74,0.2)); }
+        50% { filter: drop-shadow(0 0 25px rgba(226,176,74,0.6)); }
+    }
+    html.dark-mode #page-preloader {
+        background-color: #0a121e !important;
+    }
+</style>
+
+<script>
+    window.addEventListener('load', function() {
+        const preloader = document.getElementById('page-preloader');
+        if (preloader) {
+            preloader.style.opacity = '0';
+            preloader.style.visibility = 'hidden';
+            setTimeout(() => { preloader.remove(); }, 400);
+        }
+    });
+</script>
+
+    <!-- Left Brand Column -->
+    <div class="gateway-left">
+        <div class="brand-container">
+            <span class="brand-logo-icon">🎓</span>
+            <div class="brand-text">
+                Chennai Institute of Technology
+                <span>Learn • Lead • Inspire</span>
+            </div>
+        </div>
+
+        <h1 class="slogan-title">One Portal.<br><span>Endless Possibilities.</span></h1>
+        <p class="slogan-desc">
+            Welcome to the Chennai Institute of Technology Management Portal. Log in to access your administrative workspace, career drives, and academic scorecards.
+        </p>
+
+        <div class="feature-list">
+            <div class="feature-item">
+                <div class="feature-icon-wrapper">📅</div>
+                <div class="feature-info">
+                    <h4>Smart Management</h4>
+                    <p>Streamline events, project evaluations, and drives with ease.</p>
+                </div>
+            </div>
+            <div class="feature-item">
+                <div class="feature-icon-wrapper">👥</div>
+                <div class="feature-info">
+                    <h4>Collaborate & Connect</h4>
+                    <p>Engage with departments, students, and recruiters seamlessly.</p>
+                </div>
+            </div>
+            <div class="feature-item">
+                <div class="feature-icon-wrapper">🛡️</div>
+                <div class="feature-info">
+                    <h4>Secure & Reliable</h4>
+                    <p>Role-based access protections ensure strict data confidentiality.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Login Column -->
+    <div class="gateway-right">
+        <div class="login-card">
+            <h2>Welcome Back!</h2>
+            <p class="subtitle">Select your role to access your dashboard account.</p>
+
+            <!-- Flash messages -->
+            {% with messages = get_flashed_messages() %}
+                {% if messages %}
+                    {% for msg in messages %}
+                        <div style="background: #fef2f2; border-left: 4px solid #ef4444; color: #991b1b; padding: 12px; border-radius: 8px; font-size: 0.82rem; font-weight: 700; margin-bottom: 20px;">
+                            ⚡ {{ msg }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            <form id="loginForm" method="POST" action="{{ url_for('student.login') }}">
+                
+                <!-- STEP 1: Select Role -->
+                <span class="step-label">Step 1: Select Your Role</span>
+                <div class="role-grid">
+                    <div class="role-card" id="role-student" onclick="setRole('student', '{{ url_for('student.login') }}', 'Register Number')">
+                        <div class="role-icon">🎓</div>
+                        <div class="role-title">Student</div>
+                    </div>
+                    <div class="role-card" id="role-admin" onclick="setRole('admin', '{{ url_for('admin.login') }}', 'Username')">
+                        <div class="role-icon">🛡️</div>
+                        <div class="role-title">Admin</div>
+                    </div>
+                    <div class="role-card" id="role-company" onclick="setRole('company', '{{ url_for('company.company_login') }}', 'Email ID')">
+                        <div class="role-icon">🏢</div>
+                        <div class="role-title">Recruiter</div>
+                    </div>
+                </div>
+
+                <!-- STEP 2: Input Credentials -->
+                <span class="step-label">Step 2: Login Credentials</span>
+                
+                <div class="input-group">
+                    <label id="identityLabel">Register Number</label>
+                    <input type="text" id="identityField" name="register_number" placeholder="Enter credentials..." required>
+                </div>
+
+                <div class="input-group">
+                    <label>Password</label>
+                    <input type="password" name="password" placeholder="Enter password..." required>
+                </div>
+
+                <button type="submit" class="login-btn">🔐 Login Workspace</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Role Switcher Script -->
+    <script>
+        function setRole(role, actionUrl, labelText) {
+            // Remove active classes
+            document.querySelectorAll('.role-card').forEach(c => c.classList.remove('active'));
+            
+            // Add active class to clicked card
+            const activeCard = document.getElementById('role-' + role);
+            if (activeCard) activeCard.classList.add('active');
+
+            // Update form properties
+            const form = document.getElementById('loginForm');
+            form.action = actionUrl;
+
+            // Update Field Name & Label
+            const label = document.getElementById('identityLabel');
+            const field = document.getElementById('identityField');
+            label.textContent = labelText;
+
+            if (role === 'student') {
+                field.name = 'register_number';
+                field.placeholder = 'e.g. CIT22CS001';
+            } else if (role === 'admin') {
+                field.name = 'username';
+                field.placeholder = 'e.g. admin';
+            } else if (role === 'company') {
+                field.name = 'email';
+                field.placeholder = 'e.g. hr@google.com';
+            }
+            
+            // Save selection to cookie or state
+            localStorage.setItem('nexora_selected_role', role);
+        }
+
+        // Auto-select student on load (or saved role)
+        document.addEventListener("DOMContentLoaded", function() {
+            const savedRole = localStorage.getItem('nexora_selected_role') || 'student';
+            if (savedRole === 'student') {
+                setRole('student', '{{ url_for('student.login') }}', 'Register Number');
+            } else if (savedRole === 'admin') {
+                setRole('admin', '{{ url_for('admin.login') }}', 'Username');
+            } else if (savedRole === 'company') {
+                setRole('company', '{{ url_for('company.company_login') }}', 'Email ID');
+            }
+        });
+    </script>
 </body>
 </html>
-

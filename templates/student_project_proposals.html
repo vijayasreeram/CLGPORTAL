@@ -1,0 +1,182 @@
+{% extends "student_base.html" %}
+{% block content %}
+
+<div class="giraffe-welcome">
+    <h2>Academic <span>Project Proposals & Mentorship</span></h2>
+    <p>Submit project concepts, select department guides, and track weekly development milestones.</p>
+</div>
+
+<!-- Main Split Container -->
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; align-items: start;">
+    
+    <!-- Left Column: Submit Proposal & active logs -->
+    <div>
+        <!-- Submit Proposal Card -->
+        <div class="gazelle-card">
+            <h3 style="margin-top: 0; margin-bottom: 20px; font-size: 1.4rem; color: var(--dark);">🎯 Submit New Project Proposal</h3>
+            <form action="{{ url_for('student.project_proposals') }}" method="POST" enctype="multipart/form-data">
+                <input type="hidden" name="action" value="submit">
+                
+                <div style="display: flex; flex-direction: column; gap: 15px;">
+                    <div style="display: flex; flex-direction: column; gap: 6px;">
+                        <label style="font-weight: 700; font-size: 0.9rem; color: #777;">Project Title</label>
+                        <input type="text" name="project_title" placeholder="e.g. Real-time Object Detection with Edge Computing" class="panther-input" required>
+                    </div>
+                    
+                    <div style="display: flex; gap: 15px;">
+                        <div style="flex: 1; display: flex; flex-direction: column; gap: 6px;">
+                            <label style="font-weight: 700; font-size: 0.9rem; color: #777;">Domain / Tech Stack</label>
+                            <input type="text" name="domain" placeholder="e.g. Computer Vision / Python / IoT" class="panther-input" required>
+                        </div>
+                        <div style="flex: 1; display: flex; flex-direction: column; gap: 6px;">
+                            <label style="font-weight: 700; font-size: 0.9rem; color: #777;">Upload Concept PPT (PDF/PPTX)</label>
+                            <input type="file" name="project_ppt" accept=".ppt,.pptx,.pdf" class="panther-input" required style="padding: 8px 12px;">
+                        </div>
+                    </div>
+
+                    <div style="display: flex; flex-direction: column; gap: 6px;">
+                        <label style="font-weight: 700; font-size: 0.9rem; color: #777;">Project Description / Abstract</label>
+                        <textarea name="description" placeholder="Briefly describe the objectives, methodology, and expected outcomes..." class="panther-input" rows="4" style="resize: vertical; font-family: inherit;" required></textarea>
+                    </div>
+                    
+                    <button type="submit" class="lion-btn" style="margin-top: 10px; width: 100%;">🚀 Submit Concept Proposal</button>
+                </div>
+            </form>
+        </div>
+
+        {% for prop in proposals %}
+            {% if prop.status == 'Mentorship Active' %}
+                <!-- Weekly Logs Card -->
+                <div class="gazelle-card" style="border-left: 5px solid var(--primary-gold);">
+                    <h3 style="margin-top: 0; color: var(--dark); font-size: 1.3rem;">📋 Mentorship: {{ prop.project_title }}</h3>
+                    <p style="margin: 4px 0 15px 0; font-size: 0.9rem; color: #777;">
+                        Guided by: <b>{{ prop.mentor.name }}</b> ({{ prop.mentor.designation }}, {{ prop.mentor.department }})
+                    </p>
+
+                    <!-- Log Progress Form -->
+                    <form action="{{ url_for('student.project_proposals') }}" method="POST" style="margin-bottom: 25px; background: rgba(0,0,0,0.02); padding: 15px; border-radius: 16px; border: 1px dashed var(--glass-border);">
+                        <input type="hidden" name="action" value="log_progress">
+                        <input type="hidden" name="proposal_id" value="{{ prop.id }}">
+                        
+                        <div style="display: flex; flex-direction: column; gap: 8px;">
+                            <label style="font-weight: 700; font-size: 0.85rem; color: #666;">Submit Weekly Progress Update</label>
+                            <textarea name="update_text" placeholder="Detail tasks completed, blockers faced, and plan for next week..." class="panther-input" rows="2" style="font-family: inherit;" required></textarea>
+                            <button type="submit" class="lion-btn" style="padding: 10px 20px; font-size: 0.85rem; align-self: flex-end;">📅 Log Progress</button>
+                        </div>
+                    </form>
+
+                    <!-- Updates Timeline -->
+                    <h4 style="margin-bottom: 10px; font-size: 1rem; color: var(--dark);">Weekly Logs & Feedback</h4>
+                    {% if prop.updates %}
+                        <div style="display: flex; flex-direction: column; gap: 15px;">
+                            {% for u in prop.updates %}
+                                <div style="background: var(--white); border: 1px solid var(--glass-border); padding: 15px; border-radius: 16px;">
+                                    <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                                        <span class="owl-badge" style="background: #e6fffa; color: #319795; font-size: 0.75rem;">Week {{ u.week_no }}</span>
+                                        <span style="font-size: 0.75rem; color: #aaa;">{{ u.submitted_at.strftime('%Y-%m-%d %H:%M') }}</span>
+                                    </div>
+                                    <p style="margin: 0; font-size: 0.9rem; color: var(--dark); font-weight: 500;">{{ u.update_text }}</p>
+                                    
+                                    {% if u.mentor_feedback %}
+                                        <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid #f0f0f0; font-size: 0.85rem; color: var(--primary-gold); font-weight: 600;">
+                                            💬 Guide Feedback: <span style="color: #666; font-weight: 500;">{{ u.mentor_feedback }}</span>
+                                        </div>
+                                    {% else %}
+                                        <div style="margin-top: 10px; font-size: 0.8rem; color: #bbb; font-style: italic;">
+                                            Pending guide review/feedback
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p style="font-size: 0.85rem; color: #999; font-style: italic;">No progress updates logged yet for this project.</p>
+                    {% endif %}
+                </div>
+            {% endif %}
+        {% endfor %}
+    </div>
+
+    <!-- Right Column: Proposal Listing, Action states -->
+    <div style="display: flex; flex-direction: column; gap: 25px;">
+        
+        <!-- Flash messages inside layouts -->
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                {% for message in messages %}
+                    <div style="background: #fffaf0; border-left: 4px solid var(--primary-gold); color: #c05621; padding: 15px; border-radius: 12px; font-weight: 700; font-size: 0.9rem;">
+                        ⚡ {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <!-- Active Submissions Card -->
+        <div class="gazelle-card">
+            <h3 style="margin-top: 0; margin-bottom: 15px; font-size: 1.4rem; color: var(--dark);">📂 Proposal Submissions</h3>
+            {% if proposals %}
+                <div style="display: flex; flex-direction: column; gap: 15px;">
+                    {% for prop in proposals %}
+                        <div style="background: rgba(0,0,0,0.01); border: 1px solid var(--glass-border); padding: 20px; border-radius: 20px; position: relative;">
+                            
+                            <!-- Badges -->
+                            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
+                                <h4 style="margin: 0; font-size: 1.1rem; color: var(--dark); max-width: 70%;">{{ prop.project_title }}</h4>
+                                {% if prop.status == 'Pending Review' %}
+                                    <span class="owl-badge" style="background: #edf2f7; color: #4a5568;">⏳ Pending Review</span>
+                                {% elif prop.status == 'Approved - Select Mentor' %}
+                                    <span class="owl-badge" style="background: #ebf8ff; color: #2b6cb0;">✅ Approved - Select Guide</span>
+                                {% elif prop.status == 'Mentorship Active' %}
+                                    <span class="owl-badge" style="background: #e6fffa; color: #319795;">🚀 Mentorship Active</span>
+                                {% elif prop.status == 'Rejected' %}
+                                    <span class="owl-badge" style="background: #fff5f5; color: #e53e3e;">❌ Rejected</span>
+                                {% else %}
+                                    <span class="owl-badge">{{ prop.status }}</span>
+                                {% endif %}
+                            </div>
+
+                            <p style="margin: 4px 0; font-size: 0.85rem; color: #777;">Domain: <b>{{ prop.domain }}</b></p>
+                            <p style="margin: 8px 0; font-size: 0.9rem; color: #555; line-height: 1.4;">{{ prop.description }}</p>
+
+                            <!-- Download PPT Link -->
+                            <a href="{{ url_for('student.download_project_ppt', proposal_id=prop.id) }}" class="lion-btn-clear" style="margin: 10px 0 0 0; display: inline-flex; align-items: center; gap: 5px; font-size: 0.85rem; padding: 0;">
+                                📥 Download PPT Presentation
+                            </a>
+
+                            {% if prop.remarks %}
+                                <div style="margin-top: 15px; padding: 12px; background: rgba(226,176,74,0.06); border-radius: 12px; border-left: 3px solid var(--primary-gold); font-size: 0.85rem;">
+                                    <b>Review Remarks:</b> {{ prop.remarks }}
+                                </div>
+                            {% endif %}
+
+                            <!-- Mentor Selection Box -->
+                            {% if prop.status == 'Approved - Select Mentor' %}
+                                <div style="margin-top: 20px; border-top: 1px solid #eee; padding-top: 15px;">
+                                    <h4 style="margin: 0 0 10px 0; font-size: 0.95rem; color: var(--dark);">🎓 Select Faculty Guide</h4>
+                                    <form action="{{ url_for('student.project_proposals') }}" method="POST">
+                                        <input type="hidden" name="action" value="select_mentor">
+                                        <input type="hidden" name="proposal_id" value="{{ prop.id }}">
+                                        
+                                        <div style="display: flex; gap: 10px; align-items: center;">
+                                            <select name="mentor_id" class="panther-select" style="flex: 1;" required>
+                                                <option value="" disabled selected>Choose a mentor...</option>
+                                                {% for m in mentors %}
+                                                    <option value="{{ m.id }}">{{ m.name }} ({{ m.expertise }} - {{ m.max_slots - m.current_slots }} slots left)</option>
+                                                {% endfor %}
+                                            </select>
+                                            <button type="submit" class="lion-btn" style="padding: 11px 22px; font-size: 0.85rem;">Confirm</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p style="color: #999; font-style: italic;">No project proposals submitted yet. Use the form on the left to submit.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+{% endblock %}

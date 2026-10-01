@@ -1,20 +1,27 @@
 /* ==========================================================================
-   Internship & Placement Portal Global Stylesheet
+   Internship & Placement Portal Global Stylesheet — Nexora Design System
    ========================================================================== */
 
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700;800;900&display=swap');
 
 :root {
+    --primary-navy: #0a1c33;
     --primary-gold: #e2b04a;
     --primary-gold-hover: #c6952a;
     --white: #ffffff;
-    --bg-soft: #fcfbf7;
-    --dark: #1a1a1a;
-    --dark-charcoal: #2d2d2d;
-    --glass: rgba(255, 255, 255, 0.85);
-    --glass-border: rgba(226, 176, 74, 0.15);
-    --shadow-soft: 0 20px 50px rgba(0, 0, 0, 0.03);
-    --shadow-hover: 0 25px 60px rgba(226, 176, 74, 0.12);
+    --bg-soft: #f4f6fa;
+    --dark: #101e30;
+    --dark-charcoal: #1d2d44;
+    --glass: #ffffff;
+    --glass-border: rgba(10, 28, 51, 0.06);
+    --shadow-soft: 0 10px 30px rgba(10, 28, 51, 0.04);
+    --shadow-hover: 0 20px 45px rgba(226, 176, 74, 0.14);
+    
+    /* Nexora Status Colors */
+    --status-blue: #1d4ed8;
+    --status-green: #10b981;
+    --status-yellow: #f59e0b;
+    --status-red: #ef4444;
 }
 
 body {
@@ -23,193 +30,483 @@ body {
     color: var(--dark);
     margin: 0;
     padding: 0;
+    overflow-x: hidden;
 }
 
-/* Common Layout Containers */
-.elephant-dashboard, .elephant-view-container, .elephant-main, .elephant-profile-container {
-    max-width: 1250px;
-    margin: 2.5rem auto;
-    padding: 0 30px;
-}
-
-/* Headers */
+/* Header & Title Layouts */
 .giraffe-header, .giraffe-title, .giraffe-welcome {
-    margin-bottom: 3rem;
+    margin-bottom: 2.5rem;
 }
 .giraffe-header h2, .giraffe-title, .giraffe-welcome h2 {
-    font-size: 3rem;
-    font-weight: 900;
-    color: var(--dark);
-    letter-spacing: -1.5px;
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: var(--primary-navy);
+    letter-spacing: -1px;
     margin: 0;
 }
 .giraffe-header h2 span, .giraffe-title span, .giraffe-welcome h2 span {
     color: var(--primary-gold);
 }
 .giraffe-header p, .giraffe-welcome p {
-    color: #888;
+    color: #64748b;
     font-weight: 500;
     margin-top: 5px;
-    font-size: 1rem;
+    font-size: 0.95rem;
 }
 
-/* Glassmorphism Cards */
+/* Premium Rounded Cards */
 .gazelle-card {
-    background: var(--glass);
-    backdrop-filter: blur(20px);
-    padding: 2.5rem;
-    border-radius: 30px;
+    background: var(--white);
+    padding: 2.2rem;
+    border-radius: 24px;
     box-shadow: var(--shadow-soft);
     border: 1px solid var(--glass-border);
-    margin-bottom: 2rem;
-    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    margin-bottom: 1.8rem;
+    transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
 }
 .gazelle-card:hover {
-    transform: translateY(-5px);
-    box-shadow: var(--shadow-hover);
+    transform: translateY(-4px);
+    box-shadow: 0 15px 35px rgba(10, 28, 51, 0.08);
+    border-color: rgba(226, 176, 74, 0.2);
 }
 
-/* Premium Buttons */
+/* Buttons with Nexora Spring Physics */
 .lion-btn {
-    background: var(--dark);
+    background: var(--primary-navy);
     color: var(--white);
-    padding: 14px 28px;
+    padding: 12px 26px;
     border-radius: 50px;
     border: none;
-    font-weight: 800;
-    font-size: 0.95rem;
+    font-weight: 700;
+    font-size: 0.9rem;
     cursor: pointer;
     text-align: center;
     text-decoration: none;
     display: inline-block;
+    box-shadow: 0 4px 12px rgba(10, 28, 51, 0.12);
     transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 .lion-btn:hover {
     background: var(--primary-gold);
-    color: var(--dark);
-    transform: translateY(-3px);
-    box-shadow: 0 12px 25px rgba(226, 176, 74, 0.35);
+    color: var(--primary-navy);
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(226, 176, 74, 0.3);
 }
 .lion-btn-clear {
     background: transparent;
-    color: #888;
+    color: #64748b;
     text-decoration: none;
-    font-size: 0.95rem;
+    font-size: 0.9rem;
     font-weight: 700;
     margin-left: 15px;
     border: none;
     cursor: pointer;
-    transition: color 0.2s;
+    transition: color 0.2s ease;
 }
 .lion-btn-clear:hover {
-    color: var(--dark);
+    color: var(--primary-navy);
 }
 
-/* Inputs & Selects */
+/* Inputs & Form Elements */
 .panther-input, .panther-select {
-    background: #f9f9f9;
-    border: 1.5px solid #eee;
-    padding: 12px 18px;
-    border-radius: 14px;
+    background: #f8fafc;
+    border: 1.5px solid #e2e8f0;
+    padding: 12px 16px;
+    border-radius: 12px;
     font-weight: 600;
     font-family: inherit;
-    font-size: 0.95rem;
+    font-size: 0.92rem;
     outline: none;
+    color: var(--primary-navy);
     transition: all 0.3s ease;
     box-sizing: border-box;
 }
 .panther-input:focus, .panther-select:focus {
     border-color: var(--primary-gold);
     background: var(--white);
-    box-shadow: 0 0 10px rgba(226, 176, 74, 0.15);
+    box-shadow: 0 0 0 4px rgba(226, 176, 74, 0.12);
 }
 
-/* Badges & Pills */
+/* Pills & Badges */
 .owl-badge, .owl-pill {
-    background: #fff9e6;
-    color: var(--primary-gold);
-    padding: 6px 12px;
-    border-radius: 10px;
-    font-size: 0.85rem;
-    font-weight: 800;
+    background: rgba(226, 176, 74, 0.08);
+    color: var(--primary-gold-hover);
+    padding: 5px 12px;
+    border-radius: 8px;
+    font-size: 0.82rem;
+    font-weight: 750;
     display: inline-block;
 }
 .falcon-pill {
-    background: var(--dark);
+    background: var(--primary-navy);
     color: var(--white);
-    padding: 6px 15px;
+    padding: 6px 14px;
     border-radius: 20px;
-    font-size: 0.8rem;
+    font-size: 0.78rem;
     font-weight: 700;
     text-transform: uppercase;
 }
 
-/* Zebra Table Layouts */
+/* Zebra / Card Grid Tables */
 .zebra-table {
     width: 100%;
     border-collapse: separate;
-    border-spacing: 0 10px;
+    border-spacing: 0 8px;
 }
 .zebra-table th {
-    padding: 15px 20px;
-    font-size: 0.75rem;
+    padding: 12px 18px;
+    font-size: 0.72rem;
     text-transform: uppercase;
-    color: #aaa;
-    letter-spacing: 1px;
+    color: #64748b;
+    letter-spacing: 1.2px;
+    font-weight: 800;
     text-align: left;
 }
 .zebra-table td {
     background: var(--white);
-    padding: 18px 20px;
+    padding: 16px 18px;
     font-weight: 600;
     color: var(--dark);
-    border-top: 1px solid #f9f9f9;
-    border-bottom: 1px solid #f9f9f9;
+    border-top: 1px solid #f1f5f9;
+    border-bottom: 1px solid #f1f5f9;
 }
 .zebra-table tr td:first-child {
-    border-left: 1px solid #f9f9f9;
-    border-radius: 16px 0 0 16px;
+    border-left: 1px solid #f1f5f9;
+    border-radius: 12px 0 0 12px;
 }
 .zebra-table tr td:last-child {
-    border-right: 1px solid #f9f9f9;
-    border-radius: 0 16px 16px 0;
+    border-right: 1px solid #f1f5f9;
+    border-radius: 0 12px 12px 0;
 }
 .zebra-table tr:hover td {
-    background: #fffefb;
-    transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(226, 176, 74, 0.08);
-    transition: all 0.3s ease;
+    background: #f8fafc;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(10, 28, 51, 0.04);
+    transition: all 0.25s ease;
 }
 
-/* Interactive DataTables Custom Styling overrides */
+/* Custom Interactive DataTables Styling */
 .dataTables_wrapper .dataTables_filter input {
-    background: #f9f9f9 !important;
-    border: 1.5px solid #eee !important;
-    border-radius: 12px !important;
-    padding: 8px 14px !important;
-    margin-left: 10px !important;
+    background: #f8fafc !important;
+    border: 1.5px solid #e2e8f0 !important;
+    border-radius: 10px !important;
+    padding: 8px 12px !important;
+    margin-left: 8px !important;
     font-weight: 600 !important;
 }
 .dataTables_wrapper .dataTables_filter input:focus {
     border-color: var(--primary-gold) !important;
     background: var(--white) !important;
     outline: none !important;
+    box-shadow: 0 0 0 3px rgba(226, 176, 74, 0.12) !important;
 }
 .dataTables_wrapper .dataTables_length select {
-    background: #f9f9f9 !important;
-    border: 1.5px solid #eee !important;
+    background: #f8fafc !important;
+    border: 1.5px solid #e2e8f0 !important;
     border-radius: 8px !important;
-    padding: 6px !important;
+    padding: 5px 8px !important;
 }
 .dataTables_wrapper .dataTables_paginate .paginate_button.current {
-    background: var(--dark) !important;
+    background: var(--primary-navy) !important;
     color: white !important;
     border: none !important;
-    border-radius: 8px !important;
+    border-radius: 6px !important;
 }
 .dataTables_wrapper .dataTables_paginate .paginate_button:hover {
     background: var(--primary-gold) !important;
-    color: var(--dark) !important;
+    color: var(--primary-navy) !important;
     border: none !important;
-    border-radius: 8px !important;
+    border-radius: 6px !important;
+}
+/* ==========================================================================
+   Nexora Portal Layout UI Elements
+   ========================================================================== */
+
+/* Top bar style matching screenshots */
+.nexora-navbar {
+    background: var(--white);
+    border-bottom: 1.5px solid var(--glass-border);
+    padding: 14px 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    box-shadow: 0 4px 20px rgba(10, 28, 51, 0.02);
+}
+
+.nexora-logo {
+    font-size: 1.25rem;
+    font-weight: 900;
+    color: var(--primary-navy);
+    letter-spacing: -0.5px;
+    text-transform: uppercase;
+}
+.nexora-logo span {
+    color: var(--primary-gold);
+    font-weight: 500;
+    font-size: 0.65rem;
+    display: block;
+    letter-spacing: 1px;
+}
+
+/* Nexora Sidebar Customization */
+.wolf-drawer {
+    background: var(--primary-navy) !important;
+    border-right: none !important;
+    box-shadow: 15px 0 45px rgba(10, 28, 51, 0.15) !important;
+}
+
+.falcon-link {
+    color: rgba(255, 255, 255, 0.7) !important;
+    border-left: 3px solid transparent;
+    border-radius: 0 12px 12px 0 !important;
+    margin-right: 15px;
+    transition: all 0.25s ease !important;
+}
+
+.falcon-link:hover {
+    background: rgba(255, 255, 255, 0.04) !important;
+    color: var(--primary-gold) !important;
+    border-left-color: var(--primary-gold) !important;
+}
+
+.falcon-link.active {
+    background: rgba(226, 176, 74, 0.1) !important;
+    color: var(--primary-gold) !important;
+    border-left-color: var(--primary-gold) !important;
+    box-shadow: none !important;
+}
+
+.owl-profile {
+    background: rgba(255, 255, 255, 0.03) !important;
+    border-color: rgba(255, 255, 255, 0.08) !important;
+}
+.owl-profile p {
+    color: white !important;
+}
+
+/* Nexora Stat Cards Grid styling */
+.nexora-stat-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.nexora-stat-card {
+    background: var(--white);
+    padding: 24px;
+    border-radius: 20px;
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--shadow-soft);
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+
+.nexora-stat-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 28px rgba(10, 28, 51, 0.06);
+}
+
+.nexora-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+}
+
+/* Color thematic variants */
+.nexora-stat-card.card-blue  { border-left: 4px solid var(--status-blue); }
+.nexora-stat-card.card-blue  .nexora-icon { background: rgba(29, 78, 216, 0.08); color: var(--status-blue); }
+.nexora-stat-card.card-green { border-left: 4px solid var(--status-green); }
+.nexora-stat-card.card-green .nexora-icon { background: rgba(16, 185, 129, 0.08); color: var(--status-green); }
+.nexora-stat-card.card-yellow{ border-left: 4px solid var(--status-yellow); }
+.nexora-stat-card.card-yellow .nexora-icon { background: rgba(245, 158, 11, 0.08); color: var(--status-yellow); }
+.nexora-stat-card.card-red   { border-left: 4px solid var(--status-red); }
+.nexora-stat-card.card-red   .nexora-icon { background: rgba(239, 68, 68, 0.08); color: var(--status-red); }
+
+/* Table Actions Pills matching screenshots */
+.nexora-action-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 0.8rem;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.nexora-action-pill.approve {
+    background: rgba(16, 185, 129, 0.08);
+    color: var(--status-green);
+}
+.nexora-action-pill.approve:hover {
+    background: var(--status-green);
+    color: white;
+}
+
+.nexora-action-pill.reject {
+    background: rgba(239, 68, 68, 0.08);
+    color: var(--status-red);
+}
+.nexora-action-pill.reject:hover {
+    background: var(--status-red);
+    color: white;
+}
+
+/* ==========================================================================
+   DARK MODE — body.dark-mode overrides
+   ========================================================================== */
+
+/* Smooth transition on ALL elements when theme switches */
+*, *::before, *::after {
+    transition: background-color 0.35s ease, color 0.35s ease,
+                border-color 0.35s ease, box-shadow 0.35s ease;
+}
+
+body.dark-mode {
+    --bg-soft:       #0a121e;
+    --white:         #101e30;
+    --dark:          #e2e8f0;
+    --dark-charcoal: #1e293b;
+    --glass:         #101e30;
+    --glass-border:  rgba(255, 255, 255, 0.06);
+    --shadow-soft:   0 10px 30px rgba(0, 0, 0, 0.3);
+    --shadow-hover:  0 20px 45px rgba(226, 176, 74, 0.15);
+    background-color: #0a121e;
+    color: #e2e8f0;
+}
+
+
+/* Cards */
+body.dark-mode .gazelle-card {
+    background: rgba(28, 28, 28, 0.9);
+    border-color: rgba(226, 176, 74, 0.15);
+}
+
+/* Navigation bars */
+body.dark-mode .student-nav {
+    background: #111 !important;
+    border-bottom: 1px solid rgba(226, 176, 74, 0.15);
+}
+body.dark-mode .wolf-drawer {
+    background: rgba(18, 18, 18, 0.95) !important;
+    border-color: rgba(226, 176, 74, 0.12);
+}
+body.dark-mode .falcon-link { color: #aaa; }
+body.dark-mode .falcon-link:hover { color: var(--primary-gold); background: rgba(226,176,74,0.05); }
+body.dark-mode .falcon-link.active { background: var(--primary-gold); color: #111; }
+body.dark-mode .owl-profile { background: #1e1e1e; border-color: rgba(226,176,74,0.15); }
+
+/* Tables */
+body.dark-mode .zebra-table td {
+    background: #1c1c1c;
+    color: #ddd;
+    border-color: #2a2a2a;
+}
+body.dark-mode .zebra-table tr:hover td {
+    background: #222;
+}
+body.dark-mode .zebra-data-table td { border-color: #2a2a2a; color: #ccc; }
+body.dark-mode .zebra-data-table b  { color: #f0f0f0; }
+
+/* Inputs */
+body.dark-mode .panther-input,
+body.dark-mode .panther-select,
+body.dark-mode .form-group input,
+body.dark-mode .form-group textarea {
+    background: #1e1e1e !important;
+    border-color: #333 !important;
+    color: #f0f0f0 !important;
+}
+body.dark-mode .panther-input:focus,
+body.dark-mode .panther-select:focus,
+body.dark-mode .form-group input:focus,
+body.dark-mode .form-group textarea:focus {
+    border-color: var(--primary-gold) !important;
+    background: #222 !important;
+}
+
+/* Badges / Pills */
+body.dark-mode .owl-badge,
+body.dark-mode .owl-pill { background: rgba(226,176,74,0.12); }
+body.dark-mode .falcon-pill { background: #333; }
+
+/* Buttons */
+body.dark-mode .lion-btn { background: #2a2a2a; color: #f0f0f0; }
+body.dark-mode .lion-btn:hover { background: var(--primary-gold); color: #111; }
+body.dark-mode .hummingbird-btn { background: #1e1e1e; border-color: #333; }
+body.dark-mode .hummingbird-btn span { background: #f0f0f0; }
+
+/* Sem bars */
+body.dark-mode .python-sem-bar {
+    background: #1c1c1c !important;
+    color: #f0f0f0 !important;
+    border-color: #2a2a2a !important;
+}
+body.dark-mode .panel { background: #181818 !important; }
+
+/* Resume builder editor pane */
+body.dark-mode .editor-pane {
+    background: rgba(22, 22, 22, 0.9);
+    border-color: rgba(226, 176, 74, 0.12);
+}
+body.dark-mode .controls-row {
+    background: rgba(22, 22, 22, 0.9);
+    border-color: rgba(226, 176, 74, 0.12);
+}
+body.dark-mode .preview-pane { background: #1a1a1a; }
+body.dark-mode .tmpl-btn { background: #2a2a2a; border-color: #333; color: #ccc; }
+body.dark-mode .tmpl-btn.active { background: var(--primary-gold); color: #111; border-color: var(--primary-gold); }
+
+/* DataTables dark overrides */
+body.dark-mode .dataTables_wrapper .dataTables_filter input,
+body.dark-mode .dataTables_wrapper .dataTables_length select {
+    background: #1e1e1e !important;
+    border-color: #333 !important;
+    color: #f0f0f0 !important;
+}
+body.dark-mode .dataTables_wrapper,
+body.dark-mode .dataTables_wrapper .dataTables_info,
+body.dark-mode .dataTables_wrapper .dataTables_paginate { color: #aaa !important; }
+
+/* Dark mode toggle button */
+.dm-toggle {
+    position: fixed;
+    bottom: 28px;
+    right: 28px;
+    z-index: 9999;
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    border: 2px solid rgba(226, 176, 74, 0.3);
+    background: #1a1a1a;
+    color: #f0f0f0;
+    font-size: 1.3rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.25);
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+}
+.dm-toggle:hover {
+    transform: scale(1.15) rotate(15deg);
+    border-color: var(--primary-gold);
+    box-shadow: 0 12px 30px rgba(226, 176, 74, 0.3);
+}
+body.dark-mode .dm-toggle {
+    background: var(--primary-gold);
+    color: #111;
+    border-color: var(--primary-gold);
 }

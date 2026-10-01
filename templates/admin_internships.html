@@ -1,0 +1,226 @@
+{% extends "base.html" %}
+{% block content %}
+
+<style>
+    :root {
+        --gold: #e2b04a;
+        --navy: #0a1c33;
+    }
+
+    .aintern-hero {
+        background: linear-gradient(135deg, var(--navy), #1a3557);
+        border-radius: 22px;
+        padding: 28px 32px;
+        color: white;
+        margin-bottom: 24px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        animation: fadeIn 0.6s ease;
+    }
+    .aintern-hero h1 { font-size: 1.7rem; font-weight: 900; letter-spacing: -1px; margin: 0; }
+    .aintern-hero h1 span { color: var(--gold); }
+    .aintern-hero p { color: rgba(255,255,255,0.55); font-size: 0.86rem; margin: 6px 0 0; }
+
+    .aintern-stats { display: flex; gap: 10px; flex-shrink: 0; }
+    .astat-pill {
+        background: rgba(255,255,255,0.1);
+        border: 1px solid rgba(255,255,255,0.15);
+        border-radius: 50px;
+        padding: 8px 18px;
+        font-size: 0.78rem;
+        font-weight: 800;
+        color: white;
+        text-align: center;
+    }
+    .astat-pill span { color: var(--gold); display: block; font-size: 1.3rem; }
+
+    /* Internships Review Card */
+    .review-card {
+        background: white;
+        border-radius: 20px;
+        border: 1.5px solid #f1f5f9;
+        box-shadow: 0 4px 20px rgba(10,28,51,0.04);
+        overflow: hidden;
+        animation: slideUp 0.6s ease 0.1s both;
+    }
+    .review-header {
+        padding: 20px 26px;
+        border-bottom: 1px solid #f1f5f9;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .review-header h3 { font-weight: 900; color: var(--navy); margin: 0; font-size: 1rem; }
+    .count-badge {
+        background: #f1f5f9;
+        color: #64748b;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 800;
+    }
+
+    .internship-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 20px 26px;
+        border-bottom: 1px solid #f8fafc;
+        transition: background 0.2s;
+    }
+    .internship-row:last-child { border-bottom: none; }
+    .internship-row:hover { background: #fafbfc; }
+
+    .internship-details-wrap { display: flex; gap: 16px; align-items: flex-start; }
+    .mode-icon {
+        width: 46px; height: 46px;
+        border-radius: 12px;
+        background: #f1f5f9;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.3rem;
+        flex-shrink: 0;
+    }
+    .internship-body h4 { margin: 0 0 4px; font-weight: 800; font-size: 0.95rem; color: var(--navy); }
+    .internship-body p { margin: 0; font-size: 0.82rem; color: #64748b; font-weight: 600; }
+    .meta-pills { display: flex; gap: 8px; align-items: center; margin-top: 6px; }
+    .meta-pill {
+        font-size: 0.65rem;
+        font-weight: 800;
+        padding: 2px 8px;
+        border-radius: 20px;
+        text-transform: uppercase;
+    }
+    .pill-student { background: rgba(10,28,51,0.08); color: var(--navy); }
+    .pill-stipend { background: rgba(226,176,74,0.15); color: #92400e; }
+    .pill-mode { background: #e0f2fe; color: #0369a1; }
+
+    .action-forms { display: flex; gap: 8px; align-items: center; }
+    .verify-btn {
+        background: #10b981;
+        color: white;
+        border: none;
+        padding: 8px 18px;
+        border-radius: 50px;
+        font-weight: 800;
+        font-size: 0.78rem;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    .verify-btn:hover { background: #059669; transform: translateY(-1px); }
+
+    .decline-btn {
+        background: none;
+        border: 1.5px solid #fee2e2;
+        color: #ef4444;
+        padding: 7px 16px;
+        border-radius: 50px;
+        font-weight: 800;
+        font-size: 0.78rem;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    .decline-btn:hover { background: #ef4444; color: white; border-color: #ef4444; transform: translateY(-1px); }
+
+    .status-stamp {
+        font-size: 0.72rem;
+        font-weight: 800;
+        padding: 5px 14px;
+        border-radius: 20px;
+        text-transform: uppercase;
+        letter-spacing: 0.6px;
+        display: inline-block;
+    }
+    .stamp-verified { background: rgba(16,185,129,0.1); color: #065f46; }
+    .stamp-rejected { background: rgba(239,68,68,0.1); color: #dc2626; }
+
+    .empty-state {
+        text-align: center;
+        padding: 60px;
+        color: #94a3b8;
+    }
+    .empty-state .icon { font-size: 3.5rem; margin-bottom: 12px; }
+
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes slideUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+</style>
+
+<!-- Hero -->
+<div class="aintern-hero">
+    <div>
+        <h1>💼 Student <span>Internships</span></h1>
+        <p>Review, verify, and track logged student industry internships.</p>
+    </div>
+    <div class="aintern-stats">
+        <div class="astat-pill"><span>{{ pending_count }}</span>Pending</div>
+        <div class="astat-pill"><span>{{ verified_count }}</span>Verified</div>
+    </div>
+</div>
+
+<!-- Flash Messages -->
+{% with messages = get_flashed_messages() %}
+{% if messages %}
+{% for msg in messages %}
+<div style="background:#f0fdf4; border:1.5px solid #bbf7d0; border-radius:12px; padding:12px 18px; margin-bottom:20px; font-weight:700; font-size:0.86rem; color:#065f46;">
+    {{ msg }}
+</div>
+{% endfor %}
+{% endif %}
+{% endwith %}
+
+<!-- Review List Card -->
+<div class="review-card">
+    <div class="review-header">
+        <h3>📋 Logged Internship Entries</h3>
+        <div class="count-badge">{{ internships|length }} total logs</div>
+    </div>
+
+    {% if internships %}
+    {% for intern in internships %}
+    <div class="internship-row">
+        <div class="internship-details-wrap">
+            <div class="mode-icon">
+                {% if intern.mode == 'Remote' %}🏠{% elif intern.mode == 'Hybrid' %}🤝{% else %}🏢{% endif %}
+            </div>
+            <div class="internship-body">
+                <h4>{{ intern.company_name }}</h4>
+                <p>{{ intern.role }} • {{ intern.duration }}</p>
+                <div class="meta-pills">
+                    <span class="meta-pill pill-student">👤 {{ intern.student.student_name }} ({{ intern.register_number }})</span>
+                    <span class="meta-pill pill-stipend">₹{{ intern.stipend }}</span>
+                    <span class="meta-pill pill-mode">{{ intern.mode }}</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="action-forms">
+            {% if intern.status == 'Pending Verification' %}
+            <form method="POST" style="margin:0;">
+                <input type="hidden" name="internship_id" value="{{ intern.id }}">
+                <input type="hidden" name="action" value="reject">
+                <button type="submit" class="decline-btn">Decline</button>
+            </form>
+            <form method="POST" style="margin:0;">
+                <input type="hidden" name="internship_id" value="{{ intern.id }}">
+                <input type="hidden" name="action" value="verify">
+                <button type="submit" class="verify-btn">Verify Entry</button>
+            </form>
+            {% elif intern.status == 'Verified' %}
+            <span class="status-stamp stamp-verified">✓ Verified by {{ intern.verified_by }}</span>
+            {% else %}
+            <span class="status-stamp stamp-rejected">Declined</span>
+            {% endif %}
+        </div>
+    </div>
+    {% endfor %}
+    {% else %}
+    <div class="empty-state">
+        <div class="icon">💼</div>
+        <p style="font-weight:700;">No internships logged by students yet.</p>
+    </div>
+    {% endif %}
+</div>
+
+{% endblock %}

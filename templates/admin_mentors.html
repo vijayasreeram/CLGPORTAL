@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="giraffe-header">
+    <h2>Faculty <span>Mentors Directory</span></h2>
+    <p>Admin panel to enroll mentors, configure maximum capacity loads, and inspect student guidance distributions.</p>
+</div>
+
+{% with messages = get_flashed_messages() %}
+    {% if messages %}
+        {% for message in messages %}
+            <div style="background: #fffaf0; border-left: 4px solid var(--primary-gold); color: #c05621; padding: 15px; border-radius: 12px; font-weight: 700; font-size: 0.9rem; margin-bottom: 20px;">
+                ⚡ {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+{% endwith %}
+
+<!-- Split Panel Layout -->
+<div style="display: grid; grid-template-columns: 340px 1fr; gap: 25px; align-items: start;">
+    
+    <!-- Left Pane: Add Mentor form -->
+    <div class="gazelle-card">
+        <h3 style="margin-top: 0; margin-bottom: 18px; font-size: 1.25rem; color: var(--dark);">➕ Register Faculty Guide</h3>
+        <form action="{{ url_for('admin.mentors') }}" method="POST">
+            <input type="hidden" name="action" value="add">
+            
+            <div style="display: flex; flex-direction: column; gap: 12px;">
+                <div style="display: flex; flex-direction: column; gap: 4px;">
+                    <label style="font-weight: 700; font-size: 0.85rem; color: #777;">Full Name</label>
+                    <input type="text" name="name" placeholder="e.g. Dr. Arul Prasad" class="panther-input" required>
+                </div>
+                
+                <div style="display: flex; flex-direction: column; gap: 4px;">
+                    <label style="font-weight: 700; font-size: 0.85rem; color: #777;">Email Address</label>
+                    <input type="email" name="email" placeholder="e.g. arul.prasad@cit.edu" class="panther-input" required>
+                </div>
+
+                <div style="display: flex; gap: 10px;">
+                    <div style="flex: 1; display: flex; flex-direction: column; gap: 4px;">
+                        <label style="font-weight: 700; font-size: 0.85rem; color: #777;">Department</label>
+                        <select name="department" class="panther-select" required>
+                            <option value="CSE">CSE</option>
+                            <option value="IT">IT</option>
+                            <option value="ECE">ECE</option>
+                            <option value="EEE">EEE</option>
+                            <option value="MECH">MECH</option>
+                        </select>
+                    </div>
+                    <div style="flex: 1; display: flex; flex-direction: column; gap: 4px;">
+                        <label style="font-weight: 700; font-size: 0.85rem; color: #777;">Max Slots</label>
+                        <input type="number" name="max_slots" value="5" min="1" max="15" class="panther-input" required>
+                    </div>
+                </div>
+
+                <div style="display: flex; flex-direction: column; gap: 4px;">
+                    <label style="font-weight: 700; font-size: 0.85rem; color: #777;">Designation</label>
+                    <input type="text" name="designation" placeholder="e.g. Associate Professor" class="panther-input" required>
+                </div>
+
+                <div style="display: flex; flex-direction: column; gap: 4px;">
+                    <label style="font-weight: 700; font-size: 0.85rem; color: #777;">Areas of Expertise</label>
+                    <textarea name="expertise" placeholder="e.g. Machine Learning, Deep Learning, NLP" class="panther-input" rows="3" style="resize: vertical; font-family: inherit;" required></textarea>
+                </div>
+                
+                <button type="submit" class="lion-btn" style="margin-top: 10px; width: 100%;">🚀 Save Guide</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Right Pane: Mentors Table -->
+    <div class="gazelle-card">
+        <h3 style="margin-top: 0; margin-bottom: 20px; font-size: 1.3rem; color: var(--dark);">📋 Active Faculty Guides</h3>
+        
+        {% if mentors %}
+            <table class="zebra-table" style="width: 100%;">
+                <thead>
+                    <tr>
+                        <th>Faculty details</th>
+                        <th>Department</th>
+                        <th>Research / Expertise Focus</th>
+                        <th>Load (Active / Max)</th>
+                        <th style="text-align: right;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for m in mentors %}
+                        <tr>
+                            <td>
+                                <b style="font-size: 1.05rem; color: var(--dark);">{{ m.name }}</b><br>
+                                <span style="font-size: 0.8rem; color: #888;">{{ m.designation }}</span><br>
+                                <span style="font-size: 0.8rem; color: #888;">{{ m.email }}</span>
+                            </td>
+                            <td>
+                                <span class="owl-badge" style="background: rgba(226,176,74,0.1); color: var(--primary-gold);">{{ m.department }}</span>
+                            </td>
+                            <td>
+                                <p style="margin: 0; font-size: 0.85rem; color: #555; line-height: 1.4; font-weight: normal;">
+                                    {{ m.expertise }}
+                                </p>
+                            </td>
+                            <td>
+                                <div style="display: flex; flex-direction: column; gap: 4px;">
+                                    <div style="font-size: 0.85rem; font-weight: 700;">
+                                        {{ m.current_slots }} / {{ m.max_slots }} active
+                                    </div>
+                                    <!-- Simple styled progress bar -->
+                                    <div style="width: 100px; height: 6px; background: #eee; border-radius: 3px; overflow: hidden;">
+                                        <div style="width: {{ (m.current_slots / m.max_slots * 100) | int }}%; height: 100%; background: {% if m.current_slots >= m.max_slots %}#e53e3e{% else %}#319795{% endif %};"></div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td style="text-align: right; vertical-align: middle;">
+                                <form action="{{ url_for('admin.mentors') }}" method="POST" onsubmit="return confirm('Are you sure you want to remove this mentor? Current active students of this mentor will be reset.');" style="display: inline-block;">
+                                    <input type="hidden" name="action" value="delete">
+                                    <input type="hidden" name="mentor_id" value="{{ m.id }}">
+                                    <button type="submit" class="lion-btn" style="background: #e53e3e; padding: 8px 16px; font-size: 0.75rem; border-radius: 8px;">Delete</button>
+                                </form>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p style="color: #999; font-style: italic;">No faculty guides enrolled in system yet.</p>
+        {% endif %}
+    </div>
+
+</div>
+
+{% endblock %}

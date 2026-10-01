@@ -2,240 +2,420 @@
 {% block content %}
 
 <style>
-    /* Premium Font Import for that bold dashboard look */
-    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;700;800&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&display=swap');
 
-    :root {
-        --primary-gold: #e2b04a; /* Matches the saikrish signature gold */
-        --white: #ffffff;
-        --bg-soft: #fcfbf7;
-        --dark-charcoal: #1a1a1a; /* Matches the "Open Report" button */
-        --text-muted: #888888;
-        --glass: rgba(255, 255, 255, 0.85);
-        --gold-light: rgba(226, 176, 74, 0.1);
+    /* ── Hero Banner ───────────────────────────────────────────── */
+    .admin-hero {
+        background: linear-gradient(135deg, var(--primary-navy) 0%, #1a3a5c 60%, #0d2847 100%);
+        border-radius: 28px;
+        padding: 40px 50px;
+        margin-bottom: 32px;
+        position: relative;
+        overflow: hidden;
+        color: white;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        animation: heroSlide 0.8s cubic-bezier(0.16, 1, 0.3, 1);
     }
-
-    .elephant-dashboard {
-        max-width: 1300px;
-        margin: 0 auto;
-        padding: 60px 40px;
-        font-family: 'Plus Jakarta Sans', sans-serif;
-        background-color: var(--bg-soft);
+    .admin-hero::before {
+        content: '';
+        position: absolute;
+        top: -60px; right: -60px;
+        width: 300px; height: 300px;
+        background: radial-gradient(circle, rgba(226,176,74,0.12) 0%, transparent 70%);
+        pointer-events: none;
     }
-
-    /* Refined Header with high-contrast fonts */
-    .giraffe-header {
-        margin-bottom: 50px;
-        animation: fadeInDown 0.8s ease-out;
+    .admin-hero::after {
+        content: '';
+        position: absolute;
+        bottom: -80px; left: 40%;
+        width: 250px; height: 250px;
+        background: radial-gradient(circle, rgba(29,78,216,0.12) 0%, transparent 70%);
+        pointer-events: none;
     }
-
-    .giraffe-header h2 {
-        font-size: 3.5rem;
-        font-weight: 800; /* Matching the weight from the screenshot */
-        color: var(--dark-charcoal);
-        margin: 0;
-        letter-spacing: -2px;
+    .hero-text h1 {
+        font-size: 2.6rem;
+        font-weight: 900;
+        margin: 0 0 8px 0;
+        letter-spacing: -1.5px;
+        line-height: 1.1;
     }
-
-    .giraffe-header h2 span {
-        color: var(--primary-gold);
-    }
-
-    .giraffe-header p {
-        color: var(--text-muted);
+    .hero-text h1 span { color: var(--primary-gold); }
+    .hero-text p {
+        color: rgba(255,255,255,0.65);
+        font-size: 0.95rem;
         font-weight: 500;
-        font-size: 1.1rem;
-        margin-top: 5px;
+        margin: 0;
+    }
+    .hero-badge {
+        background: rgba(226,176,74,0.15);
+        border: 1px solid rgba(226,176,74,0.3);
+        padding: 6px 14px;
+        border-radius: 50px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: var(--primary-gold);
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+        display: inline-block;
+        margin-bottom: 14px;
+    }
+    .hero-stats {
+        display: flex;
+        gap: 30px;
+        z-index: 1;
+    }
+    .hero-stat {
+        text-align: center;
+    }
+    .hero-stat-val {
+        font-size: 2.2rem;
+        font-weight: 900;
+        color: var(--primary-gold);
+        line-height: 1;
+        letter-spacing: -1px;
+    }
+    .hero-stat-label {
+        font-size: 0.72rem;
+        color: rgba(255,255,255,0.55);
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-top: 4px;
+    }
+    .hero-divider {
+        width: 1px;
+        height: 50px;
+        background: rgba(255,255,255,0.1);
+        align-self: center;
     }
 
-    .leopard-grid {
+    /* ── Section Label ──────────────────────────────────────────── */
+    .section-label {
+        font-size: 0.72rem;
+        font-weight: 800;
+        color: #94a3b8;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        margin-bottom: 16px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    .section-label::after {
+        content: '';
+        flex: 1;
+        height: 1px;
+        background: linear-gradient(to right, #e2e8f0, transparent);
+    }
+
+    /* ── Feature Grid ───────────────────────────────────────────── */
+    .feature-grid {
         display: grid;
         grid-template-columns: repeat(3, 1fr);
-        gap: 25px;
+        gap: 18px;
+        margin-bottom: 24px;
     }
-
-    /* Refined Gazelle Card with gold/charcoal accents */
-    .gazelle-card {
-        background: var(--white);
-        padding: 35px;
-        border-radius: 32px;
+    .feature-card {
+        background: white;
+        border-radius: 22px;
+        padding: 28px 24px;
         text-decoration: none;
-        border: 1px solid rgba(226, 176, 74, 0.08);
-        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.04);
+        border: 1.5px solid transparent;
+        box-shadow: 0 4px 20px rgba(10,28,51,0.04);
         display: flex;
         flex-direction: column;
-        transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+        gap: 14px;
+        transition: all 0.35s cubic-bezier(0.165, 0.84, 0.44, 1);
         position: relative;
-        animation: fadeInUp 0.6s ease-out both;
+        overflow: hidden;
+        animation: cardUp 0.5s ease-out both;
     }
-
-    /* Card Title Font Correction: Moving away from "simple blue" */
-    .gazelle-card h3 {
-        color: var(--dark-charcoal);
-        font-weight: 800; /* Bold weight as seen in 'Add Students' header */
-        font-size: 1.4rem;
-        margin: 20px 0 8px 0;
-        transition: color 0.3s ease;
+    .feature-card::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; right: 0;
+        height: 3px;
+        background: var(--card-accent, var(--primary-gold));
+        transform: scaleX(0);
+        transition: transform 0.35s ease;
     }
-
-    .gazelle-card p {
-        color: var(--text-muted);
-        font-size: 0.95rem;
-        line-height: 1.5;
-        font-weight: 500;
+    .feature-card:hover::before { transform: scaleX(1); }
+    .feature-card:hover {
+        transform: translateY(-6px);
+        border-color: rgba(226,176,74,0.15);
+        box-shadow: 0 20px 40px rgba(10,28,51,0.08);
     }
+    .feature-card:nth-child(1) { animation-delay: 0.05s; }
+    .feature-card:nth-child(2) { animation-delay: 0.10s; }
+    .feature-card:nth-child(3) { animation-delay: 0.15s; }
+    .feature-card:nth-child(4) { animation-delay: 0.20s; }
+    .feature-card:nth-child(5) { animation-delay: 0.25s; }
+    .feature-card:nth-child(6) { animation-delay: 0.30s; }
 
-    .gazelle-card:hover {
-        transform: translateY(-12px);
-        box-shadow: 0 30px 60px rgba(226, 176, 74, 0.15);
-        border-color: var(--primary-gold);
-    }
-
-    .gazelle-card:hover h3 {
-        color: var(--primary-gold); /* Smooth color transition on hover */
-    }
-
-    /* Icons and Badges Refinement */
-    .owl-icon {
-        width: 55px;
-        height: 55px;
-        background: var(--gold-light);
+    .feature-icon {
+        width: 50px; height: 50px;
+        border-radius: 14px;
         display: flex;
         align-items: center;
         justify-content: center;
-        border-radius: 16px;
-        font-size: 1.5rem;
-        transition: all 0.3s ease;
+        font-size: 1.4rem;
+        flex-shrink: 0;
+        transition: transform 0.3s ease;
+    }
+    .feature-card:hover .feature-icon { transform: scale(1.12) rotate(5deg); }
+
+    .feature-title {
+        font-size: 1.05rem;
+        font-weight: 800;
+        color: var(--primary-navy);
+        margin: 0;
+        letter-spacing: -0.3px;
+        transition: color 0.2s;
+    }
+    .feature-card:hover .feature-title { color: var(--primary-gold); }
+
+    .feature-desc {
+        font-size: 0.82rem;
+        color: #94a3b8;
+        font-weight: 500;
+        line-height: 1.5;
+        margin: 0;
     }
 
-    .gazelle-card:hover .owl-icon {
-        transform: scale(1.1) rotate(5deg);
-        background: var(--primary-gold);
-        color: white;
-    }
-
-    /* Wide and Featured styles as seen in screenshot */
-    .tiger-featured { border: 2.5px solid var(--primary-gold); }
-    .whale-wide { grid-column: span 2; flex-direction: row; align-items: center; justify-content: space-between; }
-    .python-full { grid-column: span 3; flex-direction: row; align-items: center; justify-content: space-between; }
-
-    /* Premium Pill style for the "Open Report" look */
-    .falcon-pill {
-        background: var(--dark-charcoal);
-        color: white;
-        padding: 14px 30px;
-        border-radius: 50px;
+    .feature-arrow {
+        margin-top: auto;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 0.8rem;
         font-weight: 700;
-        font-size: 0.85rem;
-        display: inline-block;
-        margin-top: 20px;
-        transition: 0.3s ease;
+        color: #cbd5e1;
+        transition: all 0.25s ease;
+    }
+    .feature-card:hover .feature-arrow {
+        color: var(--primary-gold);
+        gap: 8px;
     }
 
-    .gazelle-card:hover .falcon-pill {
-        background: var(--primary-gold);
-        box-shadow: 0 10px 20px rgba(226, 176, 74, 0.3);
+    /* ── Wide Feature Card ──────────────────────────────────────── */
+    .feature-wide {
+        grid-column: span 2;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        padding: 32px 36px;
+        gap: 30px;
+    }
+    .feature-wide .feature-content { flex: 1; }
+    .feature-wide .feature-graphic {
+        font-size: 5rem;
+        opacity: 0.85;
+        filter: drop-shadow(0 10px 15px rgba(0,0,0,0.1));
+        transition: transform 0.4s ease;
+        flex-shrink: 0;
+    }
+    .feature-card.feature-wide:hover .feature-graphic { transform: scale(1.1) rotate(-5deg); }
+
+    /* ── Full Width Card ───────────────────────────────────────── */
+    .feature-full {
+        grid-column: span 3;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        padding: 28px 36px;
+        background: linear-gradient(135deg, var(--primary-navy), #1a3a5c);
+        color: white;
+        gap: 20px;
+    }
+    .feature-full .feature-title { color: white; font-size: 1.3rem; }
+    .feature-full .feature-desc { color: rgba(255,255,255,0.65); }
+    .feature-full .feature-arrow { color: rgba(255,255,255,0.4); }
+    .feature-full:hover .feature-arrow { color: var(--primary-gold); }
+    .feature-full:hover .feature-title { color: white; }
+    .feature-full .feature-icon {
+        background: rgba(255,255,255,0.08) !important;
+        font-size: 2rem;
+        width: 64px; height: 64px;
+    }
+    .avatar-stack { display: flex; }
+    .avatar-dot {
+        width: 44px; height: 44px;
+        border-radius: 50%;
+        border: 3px solid rgba(255,255,255,0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: 800;
+        font-size: 0.68rem;
+        margin-left: -14px;
+    }
+    .avatar-dot:first-child { margin-left: 0; }
+
+    /* ── Featured Gold Card ─────────────────────────────────────── */
+    .feature-gold {
+        --card-accent: var(--primary-gold);
+        border-color: rgba(226,176,74,0.2);
+        background: linear-gradient(135deg, #fffdf5, #ffffff);
     }
 
-    /* Animation Keyframes */
-    @keyframes fadeInUp {
-        from { opacity: 0; transform: translateY(30px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
-    @keyframes fadeInDown {
+    /* ── Keyframes ──────────────────────────────────────────────── */
+    @keyframes heroSlide {
         from { opacity: 0; transform: translateY(-20px); }
         to { opacity: 1; transform: translateY(0); }
     }
-
-    /* Staggered loading effect */
-    .leopard-grid a:nth-child(1) { animation-delay: 0.1s; }
-    .leopard-grid a:nth-child(2) { animation-delay: 0.2s; }
-    .leopard-grid a:nth-child(3) { animation-delay: 0.3s; }
+    @keyframes cardUp {
+        from { opacity: 0; transform: translateY(25px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
 </style>
 
-<div class="elephant-dashboard">
-    <header class="giraffe-header">
-        <h2>Welcome, <span>{{ user }}</span></h2>
-        <p>System Management & Analytics Portal</p>
-    </header>
-
-    <div class="leopard-grid">
-        <a href="{{ url_for('admin.add_students') }}" class="gazelle-card">
-            <div class="owl-icon">➕</div>
-            <div>
-                <h3>Add Students</h3>
-                <p>Enroll new candidates into the system.</p>
-            </div>
-        </a>
-
-        <a href="{{ url_for('admin.view_students') }}" class="gazelle-card tiger-featured">
-            <div class="owl-icon">📋</div>
-            <div>
-                <h3>View Students</h3>
-                <p>Manage and update student profiles.</p>
-            </div>
-        </a>
-        <a href="{{ url_for('admin.admin_certificates') }}" class="gazelle-card">
-    <div class="owl-icon">📄</div>
-    <div>
-        <h3>Certificate Approvals</h3>
-        <p>Review and approve student certificates.</p>
+<!-- Hero Banner -->
+<div class="admin-hero">
+    <div class="hero-text" style="z-index: 1;">
+        <div class="hero-badge">🛡️ Admin Workspace</div>
+        <h1>Welcome back, <span>{{ user }}</span></h1>
+        <p>Manage students, drive placements, and analyze academic performance.</p>
     </div>
-</a>
-
-        <a href="{{ url_for('admin.download_master') }}" class="gazelle-card">
-            <div class="owl-icon" style="background: var(--dark-charcoal); color: white;">⬇️</div>
-            <div>
-                <h3>Master CSV</h3>
-                <p>Download records for offline use.</p>
-            </div>
-        </a>
-
-        <a href="{{ url_for('admin.download_resume_csv') }}" class="gazelle-card">
-            <div class="owl-icon">🧾</div>
-            <div>
-                <h3>Resume CSV</h3>
-                <p>Download every uploaded or generated resume with student details and links.</p>
-            </div>
-        </a>
-
-        <a href="{{ url_for('admin.resume_search') }}" class="gazelle-card">
-            <div class="owl-icon">🔍</div>
-            <div>
-                <h3>AI Resume Search</h3>
-                <p>Conceptually search student resumes using semantic neural networks and FAISS.</p>
-            </div>
-        </a>
-
-        <a href="{{ url_for('admin.analysis_index') }}" class="gazelle-card whale-wide">
-            <div>
-                <h3 style="font-size: 1.8rem;">CGPA Analytics</h3>
-                <p>Visual insights into academic performance.</p>
-                <span class="falcon-pill">Open Report</span>
-            </div>
-            <div style="font-size: 4.5rem; filter: drop-shadow(0 10px 15px rgba(0,0,0,0.1));">📊</div>
-        </a>
-
-        <a href="{{ url_for('admin.admin_test_results') }}" class="gazelle-card">
-            <div class="owl-icon">📘</div>
-            <div>
-                <h3>Test Results</h3>
-                <p>Review automated test evaluations.</p>
-            </div>
-        </a>
-
-        <a href="{{ url_for('admin.drives') }}" class="gazelle-card python-full">
-            <div>
-                <h3>Company Drives</h3>
-                <p>Track placement schedules and requirements.</p>
-            </div>
-            <div style="display:flex; gap: 8px;">
-                <span style="background: #6366f1; width:45px; height:45px; border-radius:50%; border:3px solid white; display:flex; align-items:center; justify-content:center; color:white; font-weight:800; font-size:0.7rem; box-shadow:0 4px 10px rgba(0,0,0,0.1);">GC</span>
-                <span style="background: #3b82f6; width:45px; height:45px; border-radius:50%; border:3px solid white; display:flex; align-items:center; justify-content:center; color:white; font-weight:800; font-size:0.7rem; box-shadow:0 4px 10px rgba(0,0,0,0.1); margin-left:-15px;">MS</span>
-                <span style="background: #10b981; width:45px; height:45px; border-radius:50%; border:3px solid white; display:flex; align-items:center; justify-content:center; color:white; font-weight:800; font-size:0.7rem; box-shadow:0 4px 10px rgba(0,0,0,0.1); margin-left:-15px;">AMZ</span>
-            </div>
-        </a>
+    <div class="hero-stats" style="z-index:1;">
+        <div class="hero-stat">
+            <div class="hero-stat-val">🏫</div>
+            <div class="hero-stat-label">Chennai Institute of Technology</div>
+        </div>
+        <div class="hero-divider"></div>
+        <div class="hero-stat">
+            <div class="hero-stat-val">AI</div>
+            <div class="hero-stat-label">Powered</div>
+        </div>
+        <div class="hero-divider"></div>
+        <div class="hero-stat">
+            <div class="hero-stat-val">✓</div>
+            <div class="hero-stat-label">All Systems Live</div>
+        </div>
     </div>
+</div>
+
+<!-- Student Management Section -->
+<div class="section-label">👥 Student Management</div>
+<div class="feature-grid">
+
+    <a href="{{ url_for('admin.add_students') }}" class="feature-card feature-gold">
+        <div class="feature-icon" style="background: rgba(226,176,74,0.12);">➕</div>
+        <div>
+            <div class="feature-title">Enroll Students</div>
+            <div class="feature-desc">Add new candidates via CSV bulk upload or manual entry form.</div>
+        </div>
+        <div class="feature-arrow">Open Tool <span>→</span></div>
+    </a>
+
+    <a href="{{ url_for('admin.view_students') }}" class="feature-card" style="--card-accent: #1d4ed8;">
+        <div class="feature-icon" style="background: rgba(29,78,216,0.08); color: #1d4ed8;">📋</div>
+        <div>
+            <div class="feature-title">Student Directory</div>
+            <div class="feature-desc">Browse, filter and update full student profiles across all departments.</div>
+        </div>
+        <div class="feature-arrow">Browse Records <span>→</span></div>
+    </a>
+
+    <a href="{{ url_for('admin.admin_certificates') }}" class="feature-card" style="--card-accent: #10b981;">
+        <div class="feature-icon" style="background: rgba(16,185,129,0.08); color: #10b981;">📄</div>
+        <div>
+            <div class="feature-title">Certificate Panel</div>
+            <div class="feature-desc">Review, verify and approve student uploaded certifications.</div>
+        </div>
+        <div class="feature-arrow">Review Queue <span>→</span></div>
+    </a>
+</div>
+
+<!-- Analytics Section -->
+<div class="section-label">📊 Analytics & Downloads</div>
+<div class="feature-grid">
+
+    <a href="{{ url_for('admin.analysis_index') }}" class="feature-card feature-wide" style="--card-accent: #8b5cf6;">
+        <div class="feature-content">
+            <div class="feature-icon" style="background: rgba(139,92,246,0.08); color: #8b5cf6; margin-bottom: 16px;">📊</div>
+            <div class="feature-title" style="font-size: 1.4rem;">CGPA Analytics</div>
+            <div class="feature-desc" style="margin-top: 8px;">Deep-dive into academic performance trends, placement readiness scores, and predictive analytics across all batches.</div>
+            <div class="feature-arrow" style="margin-top: 20px;">Open Full Report <span>→</span></div>
+        </div>
+        <div class="feature-graphic">📈</div>
+    </a>
+
+    <a href="{{ url_for('admin.admin_test_results') }}" class="feature-card" style="--card-accent: #f59e0b;">
+        <div class="feature-icon" style="background: rgba(245,158,11,0.08); color: #f59e0b;">📘</div>
+        <div>
+            <div class="feature-title">Test Analytics</div>
+            <div class="feature-desc">Review automated aptitude and placement test evaluations.</div>
+        </div>
+        <div class="feature-arrow">View Results <span>→</span></div>
+    </a>
+
+    <a href="{{ url_for('admin.download_master') }}" class="feature-card" style="--card-accent: #06b6d4;">
+        <div class="feature-icon" style="background: rgba(6,182,212,0.08); color: #06b6d4;">⬇️</div>
+        <div>
+            <div class="feature-title">Master CSV</div>
+            <div class="feature-desc">Export complete student records for offline reporting.</div>
+        </div>
+        <div class="feature-arrow">Download <span>→</span></div>
+    </a>
+
+    <a href="{{ url_for('admin.download_resume_csv') }}" class="feature-card" style="--card-accent: #64748b;">
+        <div class="feature-icon" style="background: rgba(100,116,139,0.08); color: #64748b;">🧾</div>
+        <div>
+            <div class="feature-title">Resume Export</div>
+            <div class="feature-desc">Download all student resumes with details and drive links.</div>
+        </div>
+        <div class="feature-arrow">Export CSV <span>→</span></div>
+    </a>
+
+    <a href="{{ url_for('admin.resume_search') }}" class="feature-card feature-gold" style="--card-accent: var(--primary-gold);">
+        <div class="feature-icon" style="background: rgba(226,176,74,0.12);">🔍</div>
+        <div>
+            <div class="feature-title">AI Resume Search</div>
+            <div class="feature-desc">Semantic vector search across all resumes powered by FAISS neural indexing.</div>
+        </div>
+        <div class="feature-arrow">Launch Search <span>→</span></div>
+    </a>
+</div>
+
+<!-- Placement & Mentorship Section -->
+<div class="section-label">🚀 Placement & Mentorship</div>
+<div class="feature-grid">
+
+    <a href="{{ url_for('admin.proposals') }}" class="feature-card" style="--card-accent: #f97316;">
+        <div class="feature-icon" style="background: rgba(249,115,22,0.08); color: #f97316;">📁</div>
+        <div>
+            <div class="feature-title">Project Proposals</div>
+            <div class="feature-desc">Evaluate student project submissions and provide approval remarks.</div>
+        </div>
+        <div class="feature-arrow">Review Now <span>→</span></div>
+    </a>
+
+    <a href="{{ url_for('admin.mentors') }}" class="feature-card" style="--card-accent: #ec4899;">
+        <div class="feature-icon" style="background: rgba(236,72,153,0.08); color: #ec4899;">🎓</div>
+        <div>
+            <div class="feature-title">Faculty Mentors</div>
+            <div class="feature-desc">Manage guide roster and balance student mentorship loads.</div>
+        </div>
+        <div class="feature-arrow">Manage Roster <span>→</span></div>
+    </a>
+
+    <a href="{{ url_for('admin.drives') }}" class="feature-card feature-full" style="--card-accent: white;">
+        <div class="feature-icon">📢</div>
+        <div class="feature-content">
+            <div class="feature-title">Company Drives</div>
+            <div class="feature-desc">Track active placements, eligibility requirements and partner companies.</div>
+            <div class="feature-arrow" style="margin-top: 12px;">View All Drives <span>→</span></div>
+        </div>
+        <div class="avatar-stack">
+            <div class="avatar-dot" style="background: #6366f1;">GC</div>
+            <div class="avatar-dot" style="background: #3b82f6;">MS</div>
+            <div class="avatar-dot" style="background: #10b981;">AMZ</div>
+        </div>
+    </a>
+
 </div>
 
 {% endblock %}

@@ -157,8 +157,63 @@
             to { opacity: 1; transform: translateY(0) scale(1); }
         }
     </style>
+    <script>if(localStorage.getItem('ssms_dark_mode')==='1'){document.documentElement.classList.add('dark-mode');}</script>
 </head>
 <body>
+
+<!-- Page Preloader -->
+<div id="page-preloader" style="
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #fcfbf7;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 999999;
+    transition: opacity 0.4s ease, visibility 0.4s ease;
+">
+    <div style="text-align: center;">
+        <svg viewBox="0 0 100 105" xmlns="http://www.w3.org/2000/svg" style="
+            width: 80px;
+            height: 80px;
+            color: #e2b04a;
+            animation: pulse-spark 1.8s infinite ease-in-out, preloader-glow 1.8s infinite ease-in-out;
+        ">
+            <!-- Top-Right Spark -->
+            <path d="M 62,8 Q 62,38 92,38 Q 62,38 62,68 Q 62,38 32,38 Q 62,38 62,8 Z" fill="currentColor" />
+            <!-- Bottom-Left Spark -->
+            <path d="M 38,37 Q 38,67 68,67 Q 38,67 38,97 Q 38,67 8,67 Q 38,67 38,37 Z" fill="currentColor" style="opacity: 0.85;" />
+        </svg>
+    </div>
+</div>
+
+<style>
+    @keyframes pulse-spark {
+        0%, 100% { transform: scale(0.85) rotate(-8deg); }
+        50% { transform: scale(1.05) rotate(8deg); }
+    }
+    @keyframes preloader-glow {
+        0%, 100% { filter: drop-shadow(0 0 8px rgba(226,176,74,0.2)); }
+        50% { filter: drop-shadow(0 0 25px rgba(226,176,74,0.6)); }
+    }
+    html.dark-mode #page-preloader {
+        background-color: #0a121e !important;
+    }
+</style>
+
+<script>
+    window.addEventListener('load', function() {
+        const preloader = document.getElementById('page-preloader');
+        if (preloader) {
+            preloader.style.opacity = '0';
+            preloader.style.visibility = 'hidden';
+            setTimeout(() => { preloader.remove(); }, 400);
+        }
+    });
+</script>
 
 <div class="elephant-login-container">
     <div class="gazelle-login-card">

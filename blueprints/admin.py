@@ -288,10 +288,81 @@ def admin_assign_test(drive_index):
 @admin_required
 def add_students():
     if request.method == "POST":
+        input_method = request.form.get("input_method", "csv")
+
+        # ── Manual Entry ────────────────────────────────────────────────────
+        if input_method == "manual":
+            from models import Student, db
+            from utils import compute_skill_index_for_row, classify_skill_level
+
+            reg_no = request.form.get("register_number", "").strip()
+            if not reg_no:
+                flash("Register Number is required.")
+                return redirect(url_for("admin.add_students"))
+
+            # Check if student already exists
+            existing = Student.query.filter_by(register_number=reg_no).first()
+
+            s = existing or Student()
+            s.register_number          = reg_no
+            s.student_name             = request.form.get("student_name", "").strip()
+            s.batch                    = request.form.get("batch", "").strip()
+            s.department               = request.form.get("department", "").strip()
+            s.gender                   = request.form.get("gender", "").strip()
+            s.current_sem              = request.form.get("current_sem", type=int)
+            s.cgpa                     = request.form.get("cgpa", type=float)
+            s.foreign_language_known   = request.form.get("foreign_language_known", "").strip()
+            s.projects_done            = request.form.get("projects_done", 0, type=int)
+            s.hackathons_participated  = request.form.get("hackathons_participated", 0, type=int)
+            s.hackathons_won_top100    = request.form.get("hackathons_won_top100", 0, type=int)
+            s.leetcode_problems_solved = request.form.get("leetcode_problems_solved", 0, type=int)
+            s.codechef_rating          = request.form.get("codechef_rating", 0, type=int)
+            s.number_of_certifications = request.form.get("number_of_certifications", 0, type=int)
+            s.research_papers_published= request.form.get("research_papers_published", 0, type=int)
+            s.weekly_aptitude_avg      = request.form.get("weekly_aptitude_avg", 0.0, type=float)
+            s.avg_communication_score  = request.form.get("avg_communication_score", 0.0, type=float)
+            s.certifications_list      = request.form.get("certifications_list", "").strip()
+            s.is_active                = True
+
+            # Set a default password if new student
+            if not existing or not s.password:
+                from werkzeug.security import generate_password_hash
+                default_pw = reg_no  # default password = register number
+                s.password = generate_password_hash(default_pw)
+
+            # Compute skill index
+            try:
+                row_dict = {
+                    "CGPA": s.cgpa or 0,
+                    "Projects_Done": s.projects_done or 0,
+                    "Hackathons_Participated": s.hackathons_participated or 0,
+                    "LeetCode_Problems_Solved": s.leetcode_problems_solved or 0,
+                    "CodeChef_Rating": s.codechef_rating or 0,
+                    "Number_of_Certifications": s.number_of_certifications or 0,
+                    "Research_Papers_Published": s.research_papers_published or 0,
+                    "Weekly_Aptitude_Avg": s.weekly_aptitude_avg or 0,
+                    "Avg_Communication_Score": s.avg_communication_score or 0,
+                }
+                import pandas as _pd
+                s.skill_index = compute_skill_index_for_row(_pd.Series(row_dict))
+                s.skill_level = classify_skill_level(s.skill_index)
+            except Exception:
+                s.skill_index = 0.0
+                s.skill_level = "Beginner"
+
+            if not existing:
+                db.session.add(s)
+            db.session.commit()
+
+            action_word = "updated" if existing else "added"
+            flash(f"Student {s.student_name} ({reg_no}) {action_word} successfully! Default password is the Register Number.")
+            return redirect(url_for("admin.view_students"))
+
+        # ── CSV Upload (original) ────────────────────────────────────────────
         file = request.files.get("file")
         filename = getattr(file, "filename", "") if file is not None else ""
         if not filename or not filename.lower().endswith(".csv"):
-            flash("Please upload a CSV file")
+            flash("Please upload a valid CSV file.")
             return redirect(url_for("admin.add_students"))
         df_upload = pd.read_csv(file)
         result = merge_upload_df(df_upload, session["admin_user"])
@@ -856,4 +927,255 @@ def resume_rebuild_index():
             return jsonify(success=False, message="No PDF resumes found or index build failed. Please upload resumes first.")
     except Exception as e:
         return jsonify(success=False, message=str(e)), 500
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# PROJECT PROPOSALS & MENTORSHIP ADMIN ROUTES
+# ─────────────────────────────────────────────────────────────────────────────
+
+@admin_bp.route("/proposals", methods=["GET"])
+@admin_required
+def proposals():
+    from models import ProjectProposal
+    # Fetch all proposals sorted by submit date
+    pending = ProjectProposal.query.filter_by(status="Pending Review").order_by(ProjectProposal.submitted_at.desc()).all()
+    approved = ProjectProposal.query.filter(ProjectProposal.status.in_(["Approved - Select Mentor", "Mentorship Active"])).order_by(ProjectProposal.submitted_at.desc()).all()
+    others = ProjectProposal.query.filter(ProjectProposal.status.in_(["Rejected", "Completed"])).order_by(ProjectProposal.submitted_at.desc()).all()
+
+    return render_template(
+        "admin_project_proposals.html",
+        pending=pending,
+        approved=approved,
+        others=others
+    )
+
+
+@admin_bp.route("/proposals/review/<int:proposal_id>", methods=["POST"])
+@admin_required
+def review_proposal(proposal_id):
+    from models import ProjectProposal, db
+    proposal = ProjectProposal.query.get_or_404(proposal_id)
+    action = request.form.get("action", "")
+    remarks = request.form.get("remarks", "").strip()
+
+    if action == "approve":
+        proposal.status = "Approved - Select Mentor"
+        flash(f"Approved project proposal: '{proposal.project_title}'!")
+    elif action == "reject":
+        proposal.status = "Rejected"
+        flash(f"Rejected project proposal: '{proposal.project_title}'!")
+    
+    proposal.remarks = remarks
+    proposal.reviewed_at = datetime.utcnow()
+    db.session.commit()
+    return redirect(url_for("admin.proposals"))
+
+
+@admin_bp.route("/proposals/updates/<int:proposal_id>", methods=["GET", "POST"])
+@admin_required
+def project_updates(proposal_id):
+    from models import ProjectProposal, ProjectUpdate, db
+    proposal = ProjectProposal.query.get_or_404(proposal_id)
+
+    if request.method == "POST":
+        update_id = request.form.get("update_id")
+        feedback = request.form.get("feedback", "").strip()
+        
+        p_update = ProjectUpdate.query.get_or_404(update_id)
+        p_update.mentor_feedback = feedback
+        db.session.commit()
+        flash(f"Feedback added for Week {p_update.week_no}!")
+        return redirect(url_for("admin.project_updates", proposal_id=proposal_id))
+
+    return render_template(
+        "admin_project_updates.html",
+        proposal=proposal
+    )
+
+
+@admin_bp.route("/mentors", methods=["GET", "POST"])
+@admin_required
+def mentors():
+    from models import Mentor, db
+    
+    if request.method == "POST":
+        action = request.form.get("action", "")
+        
+        if action == "add":
+            name = request.form.get("name", "").strip()
+            email = request.form.get("email", "").strip()
+            dept = request.form.get("department", "").strip()
+            desig = request.form.get("designation", "").strip()
+            exp = request.form.get("expertise", "").strip()
+            slots = int(request.form.get("max_slots", 5))
+
+            if not name or not email:
+                flash("Name and Email are required to register a mentor.")
+                return redirect(url_for("admin.mentors"))
+
+            # Check if email is unique
+            exists = Mentor.query.filter_by(email=email).first()
+            if exists:
+                flash(f"A mentor with email {email} already exists.")
+                return redirect(url_for("admin.mentors"))
+
+            mentor = Mentor(
+                name=name,
+                email=email,
+                department=dept,
+                designation=desig,
+                expertise=exp,
+                max_slots=slots
+            )
+            db.session.add(mentor)
+            db.session.commit()
+            flash(f"Successfully registered Faculty Mentor {name}!")
+            return redirect(url_for("admin.mentors"))
+
+        elif action == "delete":
+            mentor_id = request.form.get("mentor_id")
+            mentor = Mentor.query.get_or_404(mentor_id)
+            
+            # Reset any proposals mentored by this mentor back to 'Approved - Select Mentor'
+            proposals = ProjectProposal.query.filter_by(mentor_id=mentor.id).all()
+            for prop in proposals:
+                prop.mentor_id = None
+                prop.status = "Approved - Select Mentor"
+                
+            db.session.delete(mentor)
+            db.session.commit()
+            flash(f"Deleted Faculty Mentor {mentor.name}.")
+            return redirect(url_for("admin.mentors"))
+
+    all_mentors = Mentor.query.order_by(Mentor.name.asc()).all()
+    return render_template("admin_mentors.html", mentors=all_mentors)
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# NOTIFICATION BROADCAST (Admin)
+# ─────────────────────────────────────────────────────────────────────────────
+
+@admin_bp.route("/notifications", methods=["GET", "POST"])
+@admin_required
+def admin_notifications():
+    from models import Notification, Student, db
+
+    if request.method == "POST":
+        action = request.form.get("action", "send")
+
+        if action == "send":
+            title      = request.form.get("title", "").strip()
+            message    = request.form.get("message", "").strip()
+            notif_type = request.form.get("notif_type", "info")
+            target     = request.form.get("target", "all").strip()  # "all" or a register_number
+            link       = request.form.get("link", "").strip() or None
+
+            if not title or not message:
+                flash("Title and message are required.")
+                return redirect(url_for("admin.admin_notifications"))
+
+            if target == "all":
+                # Broadcast — register_number = NULL
+                notif = Notification(
+                    register_number=None,
+                    title=title,
+                    message=message,
+                    notif_type=notif_type,
+                    link=link
+                )
+                db.session.add(notif)
+                db.session.commit()
+                flash(f"✅ Broadcast notification sent to all students.")
+            else:
+                student = Student.query.filter_by(register_number=target).first()
+                if not student:
+                    flash(f"❌ Student with register number '{target}' not found.")
+                    return redirect(url_for("admin.admin_notifications"))
+                notif = Notification(
+                    register_number=target,
+                    title=title,
+                    message=message,
+                    notif_type=notif_type,
+                    link=link
+                )
+                db.session.add(notif)
+                db.session.commit()
+                flash(f"✅ Notification sent to {student.student_name}.")
+
+            return redirect(url_for("admin.admin_notifications"))
+
+        elif action == "delete":
+            notif_id = request.form.get("notif_id")
+            notif = Notification.query.get_or_404(notif_id)
+            db.session.delete(notif)
+            db.session.commit()
+            flash("Notification deleted.")
+            return redirect(url_for("admin.admin_notifications"))
+
+    all_notifs = Notification.query.order_by(Notification.created_at.desc()).limit(200).all()
+    total_broadcast = Notification.query.filter_by(register_number=None).count()
+    total_personal  = Notification.query.filter(Notification.register_number != None).count()
+    return render_template("admin_notifications.html",
+                           notifications=all_notifs,
+                           total_broadcast=total_broadcast,
+                           total_personal=total_personal)
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# INTERNSHIP TRACKER VERIFICATION (Admin)
+# ─────────────────────────────────────────────────────────────────────────────
+
+@admin_bp.route("/internships", methods=["GET", "POST"])
+@admin_required
+def admin_internships():
+    from models import StudentInternship, Notification, Student, db
+
+    if request.method == "POST":
+        internship_id = request.form.get("internship_id")
+        action        = request.form.get("action")  # "verify" | "reject"
+        internship    = StudentInternship.query.get_or_404(internship_id)
+
+        if action == "verify":
+            internship.status = "Verified"
+            internship.verified_by = session["admin_user"]
+            internship.verified_at = datetime.utcnow()
+
+            # Trigger automated notification
+            notif = Notification(
+                register_number=internship.register_number,
+                title="✅ Internship Verified!",
+                message=f"Your internship at {internship.company_name} as {internship.role} ({internship.duration}) has been verified by the administrator.",
+                notif_type="success",
+                link="/student/internships"
+            )
+            db.session.add(notif)
+            db.session.commit()
+            flash(f"Verified internship for student {internship.register_number}.")
+
+        elif action == "reject":
+            internship.status = "Rejected"
+            internship.verified_by = session["admin_user"]
+            internship.verified_at = datetime.utcnow()
+
+            # Trigger automated notification
+            notif = Notification(
+                register_number=internship.register_number,
+                title="❌ Internship Verification Declined",
+                message=f"Verification for your internship at {internship.company_name} was declined. Please verify details and contact support.",
+                notif_type="error",
+                link="/student/internships"
+            )
+            db.session.add(notif)
+            db.session.commit()
+            flash(f"Declined verification for internship of student {internship.register_number}.")
+
+        return redirect(url_for("admin.admin_internships"))
+
+    all_internships = StudentInternship.query.order_by(StudentInternship.submitted_at.desc()).all()
+    pending_count = StudentInternship.query.filter_by(status="Pending Verification").count()
+    verified_count = StudentInternship.query.filter_by(status="Verified").count()
+    return render_template("admin_internships.html",
+                           internships=all_internships,
+                           pending_count=pending_count,
+                           verified_count=verified_count)
 

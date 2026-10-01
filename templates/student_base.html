@@ -1,80 +1,561 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Student Portal</title>
-
+    <meta charset="UTF-8">
+    <title>{{ title or "Student Portal — Chennai Institute of Technology" }}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-
     <style>
-        /* Extra student-specific enhancements */
-        .student-nav {
-            background: #1f2937;
-            padding: 15px 25px;
-            color: white;
+        :root {
+            --primary-navy: #0a1c33;
+            --primary-gold: #e2b04a;
+            --primary-gold-hover: #c6952a;
+            --white: #ffffff;
+            --bg-soft: #f4f6fa;
+            --dark: #101e30;
+            --text-muted: #64748b;
+            --glass-border: rgba(10, 28, 51, 0.06);
+        }
+
+        body {
+            margin: 0;
+            background-color: var(--bg-soft);
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        /* ── Top Navbar ────────────────────────────────────────────────────── */
+        .nexora-navbar {
+            background: var(--white);
+            border-bottom: 1.5px solid var(--glass-border);
+            padding: 14px 40px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-radius: 8px;
-            margin-bottom: 25px;
-            box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            height: 70px;
+            box-sizing: border-box;
+            box-shadow: 0 4px 20px rgba(10, 28, 51, 0.02);
         }
 
-        .student-nav a {
+        .nexora-logo-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .nexora-logo {
+            font-size: 1.15rem;
+            font-weight: 900;
+            color: var(--primary-navy);
+            letter-spacing: -0.5px;
+            text-transform: uppercase;
+            line-height: 1.1;
+        }
+        .nexora-logo span {
+            color: var(--primary-gold);
+            font-weight: 600;
+            font-size: 0.65rem;
+            display: block;
+            letter-spacing: 1.5px;
+            margin-top: 1px;
+        }
+
+        .nav-horizontal-links {
+            display: flex;
+            gap: 24px;
+            align-items: center;
+        }
+        .nav-horizontal-link {
+            color: #64748b;
+            font-weight: 700;
+            text-decoration: none;
+            font-size: 0.88rem;
+            transition: all 0.25s ease;
+            position: relative;
+            padding: 6px 0;
+        }
+        .nav-horizontal-link:hover, .nav-horizontal-link.active {
+            color: var(--primary-navy);
+        }
+        .nav-horizontal-link.active::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--primary-gold);
+            border-radius: 4px;
+        }
+
+        .user-profile-badge {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-left: 1.5px solid var(--glass-border);
+            padding-left: 20px;
+        }
+        .avatar-circle {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: var(--primary-gold);
+            color: var(--primary-navy);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 0.9rem;
+        }
+        .user-info {
+            display: flex;
+            flex-direction: column;
+            line-height: 1.2;
+        }
+        .user-info .name {
+            font-size: 0.88rem;
+            font-weight: 800;
+            color: var(--primary-navy);
+        }
+        .user-info .role {
+            font-size: 0.72rem;
+            color: #94a3b8;
+            font-weight: 600;
+        }
+
+        /* ── Main Layout Wrapper ───────────────────────────────────────────── */
+        .nexora-layout-body {
+            display: flex;
+            flex: 1;
+            min-height: calc(100vh - 70px);
+        }
+
+        /* Left Permanent Sidebar */
+        .nexora-sidebar {
+            width: 260px;
+            background: var(--primary-navy);
+            display: flex;
+            flex-direction: column;
+            padding: 30px 0;
+            box-sizing: border-box;
+            border-right: 1px solid rgba(255, 255, 255, 0.05);
+            flex-shrink: 0;
+        }
+
+        .sidebar-menu {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            padding: 0 0 30px 0;
+            flex: 1;
+        }
+        .sidebar-heading {
+            font-size: 0.72rem;
+            font-weight: 800;
+            color: rgba(226, 176, 74, 0.65);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            padding: 0 24px;
+            margin-bottom: 12px;
+        }
+        .sidebar-link {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 24px;
+            color: rgba(255, 255, 255, 0.75);
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 0.88rem;
+            border-left: 4px solid transparent;
+            transition: all 0.25s ease;
+        }
+        .sidebar-link:hover {
+            color: var(--primary-gold);
+            background: rgba(255, 255, 255, 0.03);
+            border-left-color: var(--primary-gold);
+        }
+        .sidebar-link.active {
+            color: var(--primary-gold);
+            background: rgba(226, 176, 74, 0.08);
+            border-left-color: var(--primary-gold);
+        }
+        .sidebar-icon {
+            font-size: 1.15rem;
+        }
+
+        /* Quick Actions Container (Bottom of Sidebar) */
+        .quick-actions-box {
+            margin: auto 15px 0 15px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 16px;
+            padding: 18px;
+        }
+        .quick-actions-heading {
+            font-size: 0.7rem;
+            font-weight: 800;
+            color: var(--primary-gold);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 12px;
+            display: block;
+        }
+        .quick-action-btn {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 10px 14px;
+            border-radius: 10px;
             color: white;
             text-decoration: none;
-            font-weight: 500;
-            margin-left: 15px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            transition: all 0.25s ease;
+            margin-bottom: 8px;
+        }
+        .quick-action-btn:last-child { margin-bottom: 0; }
+        .quick-action-btn:hover {
+            background: var(--primary-gold);
+            color: var(--primary-navy);
+            transform: translateY(-1px);
         }
 
-        .student-nav a:hover {
-            opacity: 0.8;
+        /* Right Content Pane */
+        .nexora-content-pane {
+            flex: 1;
+            padding: 40px;
+            box-sizing: border-box;
+            background-color: var(--bg-soft);
+            overflow-y: auto;
         }
 
+        /* Semester Panels specific style */
         .panel {
-            padding: 10px;
+            padding: 15px;
             margin-bottom: 15px;
-            border: 1px solid #cbd5e0;
-            background: #ffffff;
-            border-radius: 10px;
+            border: 1px solid var(--glass-border);
+            background: var(--white);
+            border-radius: 16px;
             display: none;
+            box-shadow: var(--shadow-soft);
         }
 
-        .sem-box {
-            background: #2b6cb0;
-            color: white;
-            padding: 12px;
-            border-radius: 10px;
+        .python-sem-bar {
+            background: var(--white);
+            border: 1px solid var(--glass-border);
+            padding: 16px 20px;
+            border-radius: 16px;
             margin-top: 12px;
-            font-size: 18px;
+            font-weight: 700;
+            font-size: 0.95rem;
             cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: var(--shadow-soft);
+            transition: all 0.3s ease;
         }
-
-        .sem-box:hover {
-            background: #245a99;
+        .python-sem-bar:hover {
+            border-color: var(--primary-gold);
+            transform: translateY(-1px);
         }
     </style>
+    <script>if(localStorage.getItem('ssms_dark_mode')==='1'){document.documentElement.classList.add('dark-mode');document.addEventListener('DOMContentLoaded',function(){document.body.classList.add('dark-mode');})}</script>
 </head>
-
 <body>
 
-<div class="container">
+<!-- Page Preloader -->
+<div id="page-preloader" style="
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #f4f6fa;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 999999;
+    transition: opacity 0.4s ease, visibility 0.4s ease;
+">
+    <div style="text-align: center;">
+        <svg viewBox="0 0 100 105" xmlns="http://www.w3.org/2000/svg" style="
+            width: 80px;
+            height: 80px;
+            color: #e2b04a;
+            animation: pulse-spark 1.8s infinite ease-in-out, preloader-glow 1.8s infinite ease-in-out;
+        ">
+            <!-- Top-Right Spark -->
+            <path d="M 62,8 Q 62,38 92,38 Q 62,38 62,68 Q 62,38 32,38 Q 62,38 62,8 Z" fill="currentColor" />
+            <!-- Bottom-Left Spark -->
+            <path d="M 38,37 Q 38,67 68,67 Q 38,67 38,97 Q 38,67 8,67 Q 38,67 38,37 Z" fill="currentColor" style="opacity: 0.85;" />
+        </svg>
+    </div>
+</div>
 
-    <div class="student-nav">
-        <div>
-            🎓 <b>Student Portal</b>
+<style>
+    @keyframes pulse-spark {
+        0%, 100% { transform: scale(0.85) rotate(-8deg); }
+        50% { transform: scale(1.05) rotate(8deg); }
+    }
+    @keyframes preloader-glow {
+        0%, 100% { filter: drop-shadow(0 0 8px rgba(226,176,74,0.2)); }
+        50% { filter: drop-shadow(0 0 25px rgba(226,176,74,0.6)); }
+    }
+    html.dark-mode #page-preloader {
+        background-color: #0a121e !important;
+    }
+</style>
+
+<script>
+    window.addEventListener('load', function() {
+        const preloader = document.getElementById('page-preloader');
+        if (preloader) {
+            preloader.style.opacity = '0';
+            preloader.style.visibility = 'hidden';
+            setTimeout(() => { preloader.remove(); }, 400);
+        }
+    });
+</script>
+
+    <!-- Sticky Top Navbar -->
+    <header class="nexora-navbar">
+        <div class="nexora-logo-container">
+            <span style="font-size: 1.6rem;">🎓</span>
+            <div class="nexora-logo">
+                Chennai Institute of Technology
+                <span>Learn • Lead • Inspire</span>
+            </div>
         </div>
-        <div>
-            <a href="{{ url_for('student.dashboard') }}">Dashboard</a>
-            <a href="{{ url_for('student.student_drives') }}">Drives</a>
-            <a href="{{ url_for('student.logout') }}" style="color:#ffb3b3;">Logout</a>
+
+        <nav class="nav-horizontal-links">
+            <a href="{{ url_for('student.dashboard') }}" class="nav-horizontal-link {% if request.endpoint == 'dashboard' %}active{% endif %}">Dashboard</a>
+            <a href="{{ url_for('student.student_drives') }}" class="nav-horizontal-link {% if request.endpoint in ['student_drives', 'student_current_drives'] %}active{% endif %}">Career Drives</a>
+            <a href="{{ url_for('student.resume_builder') }}" class="nav-horizontal-link {% if request.endpoint == 'resume_builder' %}active{% endif %}">Resume Builder</a>
+            <a href="{{ url_for('student.project_proposals') }}" class="nav-horizontal-link {% if request.endpoint == 'project_proposals' %}active{% endif %}">Project Proposals</a>
+            <a href="{{ url_for('student.internships') }}" class="nav-horizontal-link {% if request.endpoint == 'internships' %}active{% endif %}">Internship Tracker</a>
+        </nav>
+
+        <div style="display:flex; align-items:center; gap:12px;">
+            <!-- Language Selector -->
+            <select id="ssmsLangSelect" class="lang-selector-dropdown" onchange="changeLanguage(this.value)" style="
+                background: #ffffff;
+                border: 1.5px solid rgba(226, 176, 74, 0.25);
+                padding: 6px 10px;
+                border-radius: 12px;
+                font-size: 0.78rem;
+                font-weight: 800;
+                color: #0a1c33;
+                outline: none;
+                cursor: pointer;
+                font-family: inherit;
+                transition: all 0.25s ease;
+            ">
+                <option value="en">🇬🇧 EN</option>
+                <option value="ta">🇮🇳 தமிழ்</option>
+                <option value="hi">🇮🇳 हिन्दी</option>
+            </select>
+
+            <!-- Notification Bell -->
+            <a href="{{ url_for('student.notifications') }}" style="position:relative; text-decoration:none;" title="Notifications">
+                <div style="width:38px; height:38px; border-radius:12px; background:rgba(226,176,74,0.1); border:1.5px solid rgba(226,176,74,0.25); display:flex; align-items:center; justify-content:center; font-size:1.1rem; transition:all 0.25s ease;" onmouseover="this.style.background='rgba(226,176,74,0.2)'" onmouseout="this.style.background='rgba(226,176,74,0.1)'">🔔</div>
+                {% if unread_notif_count > 0 %}
+                <span style="position:absolute; top:-4px; right:-4px; background:#ef4444; color:white; font-size:0.6rem; font-weight:900; padding:2px 5px; border-radius:20px; min-width:16px; text-align:center; line-height:1.4;">{{ unread_notif_count if unread_notif_count < 100 else '99+' }}</span>
+                {% endif %}
+            </a>
+            <div class="user-profile-badge">
+                <div class="avatar-circle">{% if student %}{{ (student.Student_Name or student.student_name or 'S')[0] | upper }}{% else %}S{% endif %}</div>
+                <div class="user-info">
+                    <span class="name">{% if student %}{{ student.Student_Name or student.student_name or 'Student' }}{% else %}Student{% endif %}</span>
+                    <span class="role">Student Workspace</span>
+                </div>
+            </div>
         </div>
+    </header>
+
+    <div class="nexora-layout-body">
+        <!-- Permanent Left Sidebar -->
+        <aside class="nexora-sidebar">
+            <div class="sidebar-menu">
+                <span class="sidebar-heading">Student Workspace</span>
+                
+                <a href="{{ url_for('student.dashboard') }}" class="sidebar-link {% if request.endpoint == 'dashboard' %}active{% endif %}">
+                    <span class="sidebar-icon">🏠</span> Dashboard Home
+                </a>
+                <a href="{{ url_for('student.student_drives') }}" class="sidebar-link {% if request.endpoint in ['student_drives', 'student_current_drives'] %}active{% endif %}">
+                    <span class="sidebar-icon">📢</span> Placement Drives
+                </a>
+                <a href="{{ url_for('student.resume_builder') }}" class="sidebar-link {% if request.endpoint == 'resume_builder' %}active{% endif %}">
+                    <span class="sidebar-icon">⚡</span> Resume Builder
+                </a>
+                <a href="{{ url_for('student.project_proposals') }}" class="sidebar-link {% if request.endpoint == 'project_proposals' %}active{% endif %}">
+                    <span class="sidebar-icon">🎯</span> Project Proposals
+                </a>
+                <a href="{{ url_for('student.internships') }}" class="sidebar-link {% if request.endpoint == 'internships' %}active{% endif %}">
+                    <span class="sidebar-icon">💼</span> Internship Tracker
+                </a>
+                <a href="{{ url_for('student.notifications') }}" class="sidebar-link {% if request.endpoint == 'notifications' %}active{% endif %}" style="position:relative;">
+                    <span class="sidebar-icon">🔔</span> Notifications
+                    {% if unread_notif_count > 0 %}
+                    <span style="margin-left:auto; background:#ef4444; color:white; font-size:0.6rem; font-weight:900; padding:2px 7px; border-radius:20px;">{{ unread_notif_count }}</span>
+                    {% endif %}
+                </a>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="quick-actions-box">
+                <span class="quick-actions-heading">My Submissions</span>
+                <a href="{{ url_for('student.upload_certificate') }}" class="quick-action-btn">
+                    <span>⬆ Upload Certificates</span> <span>→</span>
+                </a>
+                <a href="{{ url_for('student.student_certificates') }}" class="quick-action-btn">
+                    <span>📁 View Certificates</span> <span>→</span>
+                </a>
+                <a href="{{ url_for('student.upload_resume') }}" class="quick-action-btn">
+                    <span>📑 Upload PDF Resume</span> <span>→</span>
+                </a>
+                <a href="{{ url_for('student.logout') }}" class="quick-action-btn" style="background: rgba(239, 68, 68, 0.1); border-color: rgba(239, 68, 68, 0.2); color: #ef4444;">
+                    <span>🚪 Logout</span> <span>→</span>
+                </a>
+            </div>
+        </aside>
+
+        <!-- Right Content Area -->
+        <main class="nexora-content-pane">
+            {% block content %}{% endblock %}
+        </main>
     </div>
 
-    {% block content %}{% endblock %}
+    <!-- Dark Mode Toggle -->
+    <button class="dm-toggle" id="dmToggle" title="Toggle Dark Mode" aria-label="Toggle dark mode">🌙</button>
 
-</div>
+    <script>
+        (function() {
+            const body = document.body;
+            const btn  = document.getElementById('dmToggle');
+            const KEY  = 'ssms_dark_mode';
+
+            if (localStorage.getItem(KEY) === '1') {
+                body.classList.add('dark-mode');
+                if (btn) btn.textContent = '☀️';
+            }
+
+            if (btn) {
+                btn.addEventListener('click', function () {
+                    body.classList.toggle('dark-mode');
+                    const isDark = body.classList.contains('dark-mode');
+                    btn.textContent = isDark ? '☀️' : '🌙';
+                    localStorage.setItem(KEY, isDark ? '1' : '0');
+                    btn.style.transform = 'scale(0.85) rotate(20deg)';
+                    setTimeout(() => { btn.style.transform = ''; }, 200);
+                });
+            }
+        })();
+    </script>
+
+    <script>
+        const TRANSLATIONS = {
+            'ta': {
+                'Dashboard': 'டாஷ்போர்டு',
+                'Dashboard Home': 'முகப்புப்பக்கம்',
+                'Placement Drives': 'வேலைவாய்ப்பு முகாம்கள்',
+                'Career Drives': 'வேலைவாய்ப்பு முகாம்கள்',
+                'Resume Builder': 'பயோடேட்டா உருவாக்குபவர்',
+                'Project Proposals': 'திட்ட முன்மொழிவுகள்',
+                'Internship Tracker': 'பயிற்சி கண்காணிப்பாளர்',
+                'Notifications': 'அறிவிப்புகள்',
+                'Student Directory': 'மாணவர் அடைவு',
+                'Certificates': 'சான்றிதழ்கள்',
+                'Mentors': 'வழிகாட்டிகள்',
+                'Analytics': 'பகுப்பாய்வு',
+                'Logout': 'வெளியேறு',
+                'Student Workspace': 'மாணவர் பணியிடம்',
+                'Recruiter Portal': 'நிறுவன நுழைவாயில்',
+                'Admin Portal': 'நிர்வாகி நுழைவாயில்',
+                'Administrator': 'நிர்வாகி',
+                'Support Desk': 'உதவி மையம்',
+                'Contact Office': 'அலுவலகத்தைத் தொடர்பு கொள்ளவும்',
+                'My Submissions': 'எனது சமர்ப்பிப்புகள்',
+                'Upload Certificates': 'சான்றிதழ்களைப் பதிவேற்றவும்',
+                'View Certificates': 'சான்றிதழ்களைப் பார்க்கவும்',
+                'Upload PDF Resume': 'பயோடேட்டாவை பதிவேற்றவும்',
+                'All Systems Live': 'அனைத்து அமைப்புகளும் நேரலையில் உள்ளன',
+                'All Sent Notifications': 'அனைத்து அறிவிப்புகளும் அனுப்பப்பட்டன',
+                'Proposals': 'திட்ட முன்மொழிவுகள்'
+            },
+            'hi': {
+                'Dashboard': 'डैशबोर्ड',
+                'Dashboard Home': 'मुख्य पृष्ठ',
+                'Placement Drives': 'प्लेसमेंट ड्राइव',
+                'Career Drives': 'प्लेसमेंट ड्राइव',
+                'Resume Builder': 'बायोडाटा निर्माता',
+                'Project Proposals': 'परियोजना प्रस्ताव',
+                'Internship Tracker': 'इंटर्नशिप ट्रैकर',
+                'Notifications': 'सूचनाएं',
+                'Student Directory': 'छात्र निर्देशिका',
+                'Certificates': 'प्रमाण पत्र',
+                'Mentors': 'सलाहकार',
+                'Analytics': 'विश्लेषण',
+                'Logout': 'लॉगआउट',
+                'Student Workspace': 'छात्र कार्यक्षेत्र',
+                'Recruiter Portal': 'भर्तीकर्ता पोर्टल',
+                'Admin Portal': 'एडमिन पोर्टल',
+                'Administrator': 'प्रशासक',
+                'Support Desk': 'सहायता पटल',
+                'Contact Office': 'कार्यालय से संपर्क करें',
+                'My Submissions': 'मेरे सबमिशन',
+                'Upload Certificates': 'प्रमाण पत्र अपलोड करें',
+                'View Certificates': 'प्रमाण पत्र देखें',
+                'Upload PDF Resume': 'बायोडाटा अपलोड करें',
+                'All Systems Live': 'सभी प्रणालियाँ सक्रिय हैं',
+                'All Sent Notifications': 'सभी भेजी गई सूचनाएं',
+                'Proposals': 'परियोजना प्रस्ताव'
+            }
+        };
+
+        function changeLanguage(lang) {
+            localStorage.setItem('ssms_current_lang', lang);
+            window.location.reload();
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const langSelect = document.getElementById('ssmsLangSelect');
+            const lang = localStorage.getItem('ssms_current_lang') || 'en';
+            if (langSelect) {
+                langSelect.value = lang;
+            }
+
+            if (lang !== 'en') {
+                const dict = TRANSLATIONS[lang];
+                if (dict) {
+                    function traverse(node) {
+                        if (node.nodeName === 'SCRIPT' || node.nodeName === 'STYLE' || node.nodeName === 'SELECT' || node.nodeName === 'OPTION') return;
+                        if (node.nodeType === Node.TEXT_NODE) {
+                            let text = node.textContent.trim();
+                            if (dict[text]) {
+                                node.textContent = node.textContent.replace(text, dict[text]);
+                            }
+                        } else {
+                            for (let child of node.childNodes) {
+                                traverse(child);
+                            }
+                        }
+                    }
+                    traverse(document.body);
+                }
+            }
+        });
+    </script>
 
 </body>
 </html>

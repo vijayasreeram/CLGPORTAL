@@ -1,0 +1,36 @@
+# ================================================================
+# .dockerignore
+# Files excluded from the Docker build context.
+# Keeps image smaller and prevents secrets from leaking in.
+# ================================================================
+
+# Python caches
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environments
+venv/
+.venv/
+env/
+
+# IDE & OS
+.DS_Store
+.vscode/
+*.swp
+Thumbs.db
+
+# Git history (not needed in image)
+.git/
+.gitignore
+
+# Large data files — mount via docker-compose volumes instead
+data/resumes/
+data/certificates/
+
+# Logs
+*.log
+
+# Secrets (use .env at runtime, not baked into image)
+.env

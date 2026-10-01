@@ -1,0 +1,316 @@
+{% extends "base.html" %}
+{% block content %}
+
+<style>
+    :root { --gold: #e2b04a; --navy: #0a1c33; }
+
+    .anotif-hero {
+        background: linear-gradient(135deg, var(--navy), #1a3557);
+        border-radius: 22px;
+        padding: 28px 32px;
+        color: white;
+        margin-bottom: 24px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        animation: heroIn 0.6s ease;
+    }
+    .anotif-hero h1 { font-size: 1.7rem; font-weight: 900; letter-spacing:-1px; margin: 0; }
+    .anotif-hero h1 span { color: var(--gold); }
+    .anotif-hero p { color: rgba(255,255,255,0.55); font-size: 0.86rem; margin: 6px 0 0; }
+    .anotif-stat-pills { display: flex; gap: 10px; flex-shrink: 0; }
+    .stat-pill {
+        background: rgba(255,255,255,0.1);
+        border: 1px solid rgba(255,255,255,0.15);
+        border-radius: 50px;
+        padding: 8px 18px;
+        font-size: 0.78rem;
+        font-weight: 800;
+        color: white;
+        text-align: center;
+    }
+    .stat-pill span { color: var(--gold); display: block; font-size: 1.3rem; }
+
+    /* Compose Form */
+    .compose-card {
+        background: white;
+        border-radius: 20px;
+        padding: 28px 32px;
+        border: 1.5px solid #f1f5f9;
+        box-shadow: 0 4px 20px rgba(10,28,51,0.05);
+        margin-bottom: 28px;
+        animation: slideUp 0.6s ease 0.1s both;
+    }
+    .compose-card h3 { font-weight: 900; color: var(--navy); margin: 0 0 20px; font-size: 1.1rem; }
+
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .form-group { display: flex; flex-direction: column; gap: 6px; }
+    .form-group.full { grid-column: 1 / -1; }
+    .form-group label { font-size: 0.72rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 1.2px; }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        padding: 12px 16px;
+        border: 1.5px solid #e2e8f0;
+        border-radius: 12px;
+        font-family: inherit;
+        font-weight: 600;
+        font-size: 0.88rem;
+        color: var(--navy);
+        background: #fafbfc;
+        transition: all 0.25s ease;
+        outline: none;
+        width: 100%;
+        box-sizing: border-box;
+    }
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+        border-color: var(--gold);
+        background: white;
+        box-shadow: 0 0 0 3px rgba(226,176,74,0.12);
+    }
+    .form-group textarea { resize: vertical; min-height: 80px; }
+
+    .target-toggle { display: flex; gap: 10px; margin-bottom: 16px; }
+    .target-btn {
+        flex: 1;
+        padding: 10px;
+        border: 2px solid #e2e8f0;
+        border-radius: 12px;
+        font-weight: 700;
+        font-size: 0.82rem;
+        cursor: pointer;
+        background: white;
+        color: #64748b;
+        transition: all 0.25s ease;
+    }
+    .target-btn.active { border-color: var(--navy); background: var(--navy); color: white; }
+
+    #target-specific-input { display: none; }
+
+    .send-btn {
+        background: var(--navy);
+        color: white;
+        border: none;
+        padding: 13px 32px;
+        border-radius: 50px;
+        font-weight: 800;
+        font-size: 0.9rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        margin-top: 6px;
+    }
+    .send-btn:hover { background: var(--gold); color: var(--navy); transform: translateY(-2px); }
+
+    /* Notifications Table Section */
+    .all-notifs-card {
+        background: white;
+        border-radius: 20px;
+        border: 1.5px solid #f1f5f9;
+        box-shadow: 0 4px 20px rgba(10,28,51,0.05);
+        overflow: hidden;
+        animation: slideUp 0.6s ease 0.2s both;
+    }
+    .all-notifs-header {
+        padding: 20px 26px;
+        border-bottom: 1px solid #f1f5f9;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .all-notifs-header h3 { font-weight: 900; color: var(--navy); margin: 0; font-size: 1rem; }
+    .count-badge {
+        background: #f1f5f9;
+        color: #64748b;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 800;
+    }
+
+    .notif-row {
+        display: flex;
+        align-items: flex-start;
+        gap: 14px;
+        padding: 16px 26px;
+        border-bottom: 1px solid #f8fafc;
+        transition: background 0.2s;
+    }
+    .notif-row:last-child { border-bottom: none; }
+    .notif-row:hover { background: #fafbfc; }
+
+    .type-dot {
+        width: 10px; height: 10px;
+        border-radius: 50%;
+        flex-shrink: 0;
+        margin-top: 6px;
+    }
+    .dot-info    { background: #3b82f6; }
+    .dot-success { background: #10b981; }
+    .dot-warning { background: #f59e0b; }
+    .dot-error   { background: #ef4444; }
+    .dot-drive   { background: var(--gold); }
+
+    .notif-row-body { flex: 1; }
+    .notif-row-title { font-weight: 800; font-size: 0.88rem; color: var(--navy); margin: 0 0 3px; }
+    .notif-row-msg   { font-size: 0.8rem; color: #64748b; font-weight: 500; }
+    .notif-row-meta  { display: flex; gap: 10px; align-items: center; margin-top: 6px; flex-wrap: wrap; }
+    .meta-pill {
+        font-size: 0.65rem;
+        font-weight: 800;
+        padding: 2px 9px;
+        border-radius: 20px;
+        text-transform: uppercase;
+    }
+    .meta-broadcast { background: rgba(99,102,241,0.1); color: #4f46e5; }
+    .meta-personal  { background: rgba(16,185,129,0.1); color: #065f46; }
+    .meta-time      { font-size: 0.7rem; color: #94a3b8; font-weight: 600; }
+
+    .del-form { margin: 0; }
+    .del-btn {
+        background: none;
+        border: 1.5px solid #fee2e2;
+        color: #ef4444;
+        border-radius: 8px;
+        padding: 5px 12px;
+        font-size: 0.72rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.2s;
+        flex-shrink: 0;
+    }
+    .del-btn:hover { background: #ef4444; color: white; }
+
+    .empty-state {
+        text-align: center;
+        padding: 50px;
+        color: #94a3b8;
+    }
+    .empty-state .icon { font-size: 3rem; margin-bottom: 12px; }
+
+    @keyframes heroIn  { from { opacity:0; transform:translateY(-14px); } to { opacity:1; transform:translateY(0); } }
+    @keyframes slideUp { from { opacity:0; transform:translateY(20px); }  to { opacity:1; transform:translateY(0); } }
+</style>
+
+<!-- Hero -->
+<div class="anotif-hero">
+    <div>
+        <h1>📣 Notification <span>Broadcast</span></h1>
+        <p>Send targeted or broadcast notifications to students directly in their portal feed.</p>
+    </div>
+    <div class="anotif-stat-pills">
+        <div class="stat-pill"><span>{{ total_broadcast }}</span>Broadcasts</div>
+        <div class="stat-pill"><span>{{ total_personal }}</span>Personal</div>
+    </div>
+</div>
+
+<!-- Flash Messages -->
+{% with messages = get_flashed_messages() %}
+{% if messages %}
+{% for msg in messages %}
+<div style="background:{% if '✅' in msg %}#f0fdf4{% elif '❌' in msg %}#fef2f2{% else %}#fefce8{% endif %}; border:1.5px solid {% if '✅' in msg %}#bbf7d0{% elif '❌' in msg %}#fecaca{% else %}#fde68a{% endif %}; border-radius:14px; padding:14px 20px; margin-bottom:16px; font-weight:700; font-size:0.88rem; color:{% if '✅' in msg %}#065f46{% elif '❌' in msg %}#dc2626{% else %}#92400e{% endif %};">
+    {{ msg }}
+</div>
+{% endfor %}
+{% endif %}
+{% endwith %}
+
+<!-- Compose Form -->
+<div class="compose-card">
+    <h3>✍️ Compose Notification</h3>
+    <form method="POST">
+        <input type="hidden" name="action" value="send">
+        <input type="hidden" name="target" id="targetValue" value="all">
+
+        <div class="target-toggle">
+            <button type="button" class="target-btn active" id="btnAll" onclick="setTarget('all')">📡 All Students (Broadcast)</button>
+            <button type="button" class="target-btn" id="btnSpecific" onclick="setTarget('specific')">👤 Specific Student</button>
+        </div>
+
+        <div id="target-specific-input" class="form-group" style="margin-bottom:16px;">
+            <label>Student Register Number</label>
+            <input type="text" id="specificRegNo" placeholder="e.g. CIT22CS001" oninput="updateTarget(this.value)">
+        </div>
+
+        <div class="form-grid">
+            <div class="form-group">
+                <label>Notification Type</label>
+                <select name="notif_type">
+                    <option value="info">ℹ️ Info</option>
+                    <option value="success">✅ Success</option>
+                    <option value="warning">⚠️ Warning</option>
+                    <option value="drive">📢 New Drive</option>
+                    <option value="error">❌ Alert</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Deep Link (optional)</label>
+                <input type="text" name="link" placeholder="e.g. /student/drives">
+            </div>
+            <div class="form-group full">
+                <label>Title</label>
+                <input type="text" name="title" placeholder="e.g. New Company Drive: TCS Digital 2026" required>
+            </div>
+            <div class="form-group full">
+                <label>Message</label>
+                <textarea name="message" placeholder="Write the full notification message here..." required></textarea>
+            </div>
+        </div>
+        <button class="send-btn" type="submit">📨 Send Notification</button>
+    </form>
+</div>
+
+<!-- All Notifications -->
+<div class="all-notifs-card">
+    <div class="all-notifs-header">
+        <h3>📋 All Sent Notifications</h3>
+        <div class="count-badge">{{ notifications|length }} total</div>
+    </div>
+
+    {% if notifications %}
+    {% for notif in notifications %}
+    <div class="notif-row">
+        <div class="type-dot dot-{{ notif.notif_type }}" title="{{ notif.notif_type }}"></div>
+        <div class="notif-row-body">
+            <div class="notif-row-title">{{ notif.title }}</div>
+            <div class="notif-row-msg">{{ notif.message[:120] }}{% if notif.message|length > 120 %}…{% endif %}</div>
+            <div class="notif-row-meta">
+                {% if notif.register_number is none %}
+                <span class="meta-pill meta-broadcast">📡 Broadcast</span>
+                {% else %}
+                <span class="meta-pill meta-personal">👤 {{ notif.register_number }}</span>
+                {% endif %}
+                <span class="meta-time">{{ notif.created_at.strftime('%d %b %Y, %I:%M %p') }}</span>
+            </div>
+        </div>
+        <form method="POST" class="del-form" onsubmit="return confirm('Delete this notification?')">
+            <input type="hidden" name="action" value="delete">
+            <input type="hidden" name="notif_id" value="{{ notif.id }}">
+            <button class="del-btn" type="submit">🗑 Delete</button>
+        </form>
+    </div>
+    {% endfor %}
+    {% else %}
+    <div class="empty-state">
+        <div class="icon">📭</div>
+        <p style="font-weight:700;">No notifications sent yet. Use the form above to broadcast your first message.</p>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+    function setTarget(mode) {
+        document.getElementById('targetValue').value = mode === 'all' ? 'all' : (document.getElementById('specificRegNo').value || 'all');
+        document.getElementById('btnAll').classList.toggle('active', mode === 'all');
+        document.getElementById('btnSpecific').classList.toggle('active', mode !== 'all');
+        document.getElementById('target-specific-input').style.display = mode === 'all' ? 'none' : 'flex';
+        document.getElementById('target-specific-input').style.flexDirection = 'column';
+    }
+    function updateTarget(val) {
+        document.getElementById('targetValue').value = val || 'all';
+    }
+</script>
+
+{% endblock %}

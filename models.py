@@ -134,6 +134,14 @@ class Student(db.Model):
     skill_index                 = db.Column(db.Float, default=0)
     skill_level                 = db.Column(db.String(50))
 
+    # Resume Builder Custom Fields
+    resume_email                = db.Column(db.String(100), nullable=True)
+    resume_phone                = db.Column(db.String(50), nullable=True)
+    resume_linkedin             = db.Column(db.String(200), nullable=True)
+    resume_github               = db.Column(db.String(200), nullable=True)
+    resume_summary              = db.Column(db.Text, nullable=True)
+    resume_work_experience      = db.Column(db.Text, nullable=True)
+
     # Soft Delete (replaces recycle_bin.csv)
     is_active                   = db.Column(db.Boolean, default=True, nullable=False, index=True)
     deleted_at                  = db.Column(db.DateTime, nullable=True)
@@ -297,3 +305,102 @@ class TestResult(db.Model):
     marks_wrong     = db.Column(db.Float)
     cheated         = db.Column(db.Integer, default=0)
     submitted_at    = db.Column(db.String(50))
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Mentor
+# ─────────────────────────────────────────────────────────────────────────────
+class Mentor(db.Model):
+    __tablename__ = "mentors"
+
+    id            = db.Column(db.Integer, primary_key=True)
+    name          = db.Column(db.String(200), nullable=False)
+    email         = db.Column(db.String(200), unique=True, nullable=False)
+    department    = db.Column(db.String(100))
+    designation   = db.Column(db.String(100))
+    expertise     = db.Column(db.String(300))
+    max_slots     = db.Column(db.Integer, default=5)
+    current_slots = db.Column(db.Integer, default=0)
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# ProjectProposal
+# ─────────────────────────────────────────────────────────────────────────────
+class ProjectProposal(db.Model):
+    __tablename__ = "project_proposals"
+
+    id              = db.Column(db.Integer, primary_key=True)
+    register_number = db.Column(db.String(50), db.ForeignKey("students.register_number", ondelete="CASCADE"), nullable=False, index=True)
+    project_title   = db.Column(db.String(300), nullable=False)
+    description     = db.Column(db.Text)
+    domain          = db.Column(db.String(100))
+    ppt_path        = db.Column(db.Text)
+    status          = db.Column(db.String(50), default="Pending Review")  # Pending Review, Approved - Select Mentor, Mentorship Active, Rejected, Completed
+    submitted_at    = db.Column(db.DateTime, default=datetime.utcnow)
+    reviewed_at     = db.Column(db.DateTime, nullable=True)
+    remarks         = db.Column(db.Text)
+    mentor_id       = db.Column(db.Integer, db.ForeignKey("mentors.id", ondelete="SET NULL"), nullable=True)
+
+    # Relationships
+    student = db.relationship("Student", backref=db.backref("proposals", lazy=True, cascade="all, delete-orphan"))
+    mentor  = db.relationship("Mentor", backref=db.backref("proposals", lazy=True))
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# ProjectUpdate
+# ─────────────────────────────────────────────────────────────────────────────
+class ProjectUpdate(db.Model):
+    __tablename__ = "project_updates"
+
+    id              = db.Column(db.Integer, primary_key=True)
+    proposal_id     = db.Column(db.Integer, db.ForeignKey("project_proposals.id", ondelete="CASCADE"), nullable=False, index=True)
+    week_no         = db.Column(db.Integer, nullable=False)
+    update_text     = db.Column(db.Text, nullable=False)
+    submitted_at    = db.Column(db.DateTime, default=datetime.utcnow)
+    mentor_feedback = db.Column(db.Text)
+
+    proposal = db.relationship("ProjectProposal", backref=db.backref("updates", lazy=True, order_by="ProjectUpdate.week_no", cascade="all, delete-orphan"))
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Notification
+# In-portal notification feed per student.
+# Types: info | success | warning | error | drive
+# ─────────────────────────────────────────────────────────────────────────────
+class Notification(db.Model):
+    __tablename__ = "notifications"
+
+    id              = db.Column(db.Integer, primary_key=True)
+    register_number = db.Column(db.String(50), db.ForeignKey("students.register_number", ondelete="CASCADE"), nullable=True, index=True)
+    # If register_number is NULL the notification is broadcast to ALL students
+    title           = db.Column(db.String(300), nullable=False)
+    message         = db.Column(db.Text, nullable=False)
+    notif_type      = db.Column(db.String(30), default="info")   # info | success | warning | error | drive
+    is_read         = db.Column(db.Boolean, default=False)
+    created_at      = db.Column(db.DateTime, default=datetime.utcnow)
+    link            = db.Column(db.String(300), nullable=True)   # optional deep-link URL
+
+    student = db.relationship("Student", backref=db.backref("notifications", lazy=True, cascade="all, delete-orphan"))
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# StudentInternship
+# For tracking student internships (completed or ongoing).
+# ─────────────────────────────────────────────────────────────────────────────
+class StudentInternship(db.Model):
+    __tablename__ = "student_internships"
+
+    id              = db.Column(db.Integer, primary_key=True)
+    register_number = db.Column(db.String(50), db.ForeignKey("students.register_number", ondelete="CASCADE"), nullable=False, index=True)
+    company_name    = db.Column(db.String(250), nullable=False)
+    role            = db.Column(db.String(250), nullable=False)
+    duration        = db.Column(db.String(100), nullable=False)  # e.g., "3 Months", "Summer 2025"
+    stipend         = db.Column(db.String(100))                 # e.g., "15000" or "Unpaid"
+    mode            = db.Column(db.String(50), default="Onsite") # Remote | Onsite | Hybrid
+    status          = db.Column(db.String(50), default="Pending Verification") # Pending Verification | Verified | Rejected
+    verified_by     = db.Column(db.String(100), nullable=True)
+    submitted_at    = db.Column(db.DateTime, default=datetime.utcnow)
+    verified_at     = db.Column(db.DateTime, nullable=True)
+
+    student = db.relationship("Student", backref=db.backref("internships", lazy=True, cascade="all, delete-orphan"))
+

@@ -1,209 +1,288 @@
 {% extends "company_base.html" %}
 
-{% block title %}Company Dashboard{% endblock %}
+{% block title %}Recruiter Dashboard — Chennai Institute of Technology{% endblock %}
 
 {% block content %}
 
 <style>
-    :root {
-        --primary-gold: #e2b04a;
-        --white: #ffffff;
-        --bg-soft: #fcfbf7;
-        --dark: #1a1a1a;
-        --glass: rgba(255, 255, 255, 0.85);
-        --glass-border: rgba(226, 176, 176, 0.15);
-    }
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&display=swap');
 
-    body { background-color: var(--bg-soft); font-family: 'Plus Jakarta Sans', sans-serif; }
-
-    /* Main Container: "Elephant" */
-    .elephant-dashboard-container {
-        max-width: 1200px;
-        margin: 2rem auto;
-        padding: 0 40px;
-    }
-
-    /* Header Section: "Giraffe" */
-    .giraffe-header {
+    /* ── Recruiter Hero ─────────────────────────────────────────── */
+    .recruiter-hero {
+        background: linear-gradient(135deg, #0f2544 0%, #1a3a5c 60%, #0a1c33 100%);
+        border-radius: 28px;
+        padding: 40px 48px;
+        margin-bottom: 28px;
+        position: relative;
+        overflow: hidden;
+        color: white;
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 3.5rem;
-        animation: fadeInDown 0.8s ease-out;
+        animation: heroIn 0.8s cubic-bezier(0.16, 1, 0.3, 1);
     }
-
-    .giraffe-header h2 {
-        font-size: 3rem;
-        font-weight: 900;
-        color: var(--dark);
-        margin: 0;
-        letter-spacing: -2px;
+    .recruiter-hero::before {
+        content: '';
+        position: absolute;
+        top: -80px; right: -40px;
+        width: 320px; height: 320px;
+        background: radial-gradient(circle, rgba(226,176,74,0.10) 0%, transparent 70%);
+        pointer-events: none;
     }
-
-    .giraffe-header h2 span { color: var(--primary-gold); }
-
-    /* Card Box: "Gazelle" */
-    .gazelle-profile-card {
-        background: var(--glass);
-        backdrop-filter: blur(20px);
-        -webkit-backdrop-filter: blur(20px);
-        padding: 3rem;
-        border-radius: 35px;
-        box-shadow: 0 25px 50px rgba(0,0,0,0.03);
-        border: 1px solid var(--glass-border);
-        margin-bottom: 2rem;
+    .recruiter-hero::after {
+        content: '';
+        position: absolute;
+        bottom: -60px; left: 30%;
+        width: 260px; height: 260px;
+        background: radial-gradient(circle, rgba(99,102,241,0.08) 0%, transparent 70%);
+        pointer-events: none;
     }
-
-    /* Buttons: "Lion" */
-    .lion-btn {
-        text-decoration: none;
-        padding: 14px 28px;
+    .hero-label {
+        background: rgba(226,176,74,0.15);
+        border: 1px solid rgba(226,176,74,0.3);
+        padding: 5px 14px;
         border-radius: 50px;
+        font-size: 0.72rem;
         font-weight: 700;
-        font-size: 0.9rem;
+        color: #e2b04a;
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+        display: inline-block;
+        margin-bottom: 14px;
+    }
+    .hero-main h1 {
+        font-size: 2.5rem;
+        font-weight: 900;
+        margin: 0 0 6px 0;
+        letter-spacing: -1.5px;
+        line-height: 1.1;
+        z-index: 1;
+        position: relative;
+    }
+    .hero-main h1 span { color: #e2b04a; }
+    .hero-main p {
+        color: rgba(255,255,255,0.6);
+        font-size: 0.92rem;
+        font-weight: 500;
+        margin: 0;
+        position: relative;
+        z-index: 1;
+    }
+    .hero-action {
+        z-index: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 12px;
+    }
+    .cta-btn {
+        background: #e2b04a;
+        color: #0a1c33;
+        padding: 15px 30px;
+        border-radius: 50px;
+        font-weight: 800;
+        font-size: 0.92rem;
+        text-decoration: none;
         display: inline-flex;
         align-items: center;
+        gap: 8px;
+        transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        box-shadow: 0 8px 24px rgba(226,176,74,0.35);
+        white-space: nowrap;
+    }
+    .cta-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 16px 32px rgba(226,176,74,0.45);
+    }
+    .logout-link {
+        color: rgba(255,255,255,0.5);
+        font-size: 0.82rem;
+        font-weight: 700;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        transition: color 0.2s;
+    }
+    .logout-link:hover { color: #ef4444; }
+
+    /* ── Drives Panel ─────────────────────────────────────────── */
+    .panel-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 20px;
+    }
+    .panel-title {
+        font-size: 1.25rem;
+        font-weight: 800;
+        color: var(--primary-navy, #0a1c33);
+        letter-spacing: -0.5px;
+        display: flex;
+        align-items: center;
         gap: 10px;
-        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        cursor: pointer;
-        border: none;
     }
-
-    .lion-btn-create {
-        background: var(--dark);
-        color: white;
-        width: 100%;
-        justify-content: center;
-        margin-bottom: 2rem;
-    }
-
-    .lion-btn-create:hover {
-        background: var(--primary-gold);
-        transform: translateY(-5px);
-        box-shadow: 0 15px 30px rgba(226, 176, 74, 0.3);
-    }
-
-    .lion-btn-danger {
-        background: #fef2f2;
-        color: #dc2626;
-        border: 1px solid #fee2e2;
-    }
-
-    .lion-btn-danger:hover {
-        background: #dc2626;
-        color: white;
-        transform: scale(1.05);
-    }
-
-    /* Table: "Zebra" */
-    .zebra-table {
-        width: 100%;
-        border-collapse: separate;
-        border-spacing: 0 12px;
-        margin-top: 1.5rem;
-    }
-
-    .zebra-table th {
-        padding: 0 20px;
-        font-size: 0.75rem;
-        text-transform: uppercase;
-        color: #999;
-        letter-spacing: 1.5px;
+    .panel-count {
+        background: rgba(226,176,74,0.12);
+        color: #c6952a;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.78rem;
         font-weight: 800;
     }
 
-    .zebra-table td {
-        background: var(--white);
-        padding: 20px;
-        font-weight: 600;
-        color: var(--dark);
-        box-shadow: 0 4px 15px rgba(0,0,0,0.02);
+    /* ── Drive Cards ──────────────────────────────────────────── */
+    .drives-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 14px;
     }
-
-    .zebra-table tr td:first-child { border-radius: 16px 0 0 16px; font-weight: 800; color: var(--primary-gold); }
-    .zebra-table tr td:last-child { border-radius: 0 16px 16px 0; color: #888; font-size: 0.85rem; }
-
-    .zebra-table tr:hover td {
-        background: #fffdf9;
-        transform: scale(1.01);
-        transition: 0.3s ease;
+    .drive-card {
+        background: white;
+        border-radius: 18px;
+        padding: 22px 26px;
+        border: 1.5px solid rgba(10,28,51,0.06);
+        box-shadow: 0 4px 16px rgba(10,28,51,0.03);
+        display: grid;
+        grid-template-columns: auto 1fr auto auto auto;
+        align-items: center;
+        gap: 20px;
+        transition: all 0.3s ease;
+        animation: driveIn 0.4s ease both;
     }
-
-    /* Badge: "Owl" */
-    .owl-badge {
-        background: #fff9e6;
-        color: var(--primary-gold);
+    .drive-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 28px rgba(10,28,51,0.06);
+        border-color: rgba(226,176,74,0.2);
+    }
+    .drive-id-badge {
+        background: rgba(226,176,74,0.1);
+        color: #c6952a;
+        padding: 8px 14px;
+        border-radius: 12px;
+        font-weight: 800;
+        font-size: 0.85rem;
+        white-space: nowrap;
+    }
+    .drive-position {
+        font-weight: 800;
+        font-size: 1rem;
+        color: #0a1c33;
+        letter-spacing: -0.3px;
+    }
+    .drive-package {
+        background: linear-gradient(135deg, rgba(226,176,74,0.15), rgba(226,176,74,0.05));
+        border: 1px solid rgba(226,176,74,0.25);
+        color: #c6952a;
+        padding: 7px 16px;
+        border-radius: 12px;
+        font-weight: 800;
+        font-size: 0.88rem;
+        white-space: nowrap;
+    }
+    .drive-seats {
+        font-weight: 700;
+        font-size: 0.85rem;
+        color: #64748b;
+        white-space: nowrap;
+    }
+    .drive-deadline {
+        font-weight: 700;
+        font-size: 0.82rem;
+        color: #dc2626;
+        background: rgba(239,68,68,0.06);
         padding: 6px 12px;
         border-radius: 10px;
-        font-size: 0.8rem;
-        font-weight: 800;
+        white-space: nowrap;
     }
 
-    @keyframes fadeInDown {
+    /* ── Empty State ────────────────────────────────────────────── */
+    .empty-state {
+        text-align: center;
+        padding: 60px 40px;
+        background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+        border-radius: 24px;
+        border: 2px dashed #e2e8f0;
+    }
+    .empty-state .empty-icon { font-size: 3.5rem; margin-bottom: 16px; }
+    .empty-state h3 {
+        font-weight: 800;
+        font-size: 1.15rem;
+        color: #0a1c33;
+        margin: 0 0 8px;
+    }
+    .empty-state p {
+        font-size: 0.9rem;
+        color: #94a3b8;
+        margin: 0 0 24px;
+        font-weight: 500;
+    }
+
+    /* ── Keyframes ───────────────────────────────────────────────── */
+    @keyframes heroIn {
         from { opacity: 0; transform: translateY(-20px); }
         to { opacity: 1; transform: translateY(0); }
     }
+    @keyframes driveIn {
+        from { opacity: 0; transform: translateX(-15px); }
+        to { opacity: 1; transform: translateX(0); }
+    }
 </style>
 
-<div class="elephant-dashboard-container">
-
-    <header class="giraffe-header">
-        <div>
-            <span style="color: var(--primary-gold); font-weight: 800; text-transform: uppercase; letter-spacing: 2px; font-size: 0.75rem;">Partner Dashboard</span>
-            <h2>Welcome, <span>{{ session['hr_name'] }}</span></h2>
-            <p style="color: #888; margin-top: 5px; font-weight: 500;">{{ session['company_name'] }}</p>
-        </div>
-        <a href="{{ url_for('company.company_logout') }}" class="lion-btn lion-btn-danger">
-            🚪 Logout
+<!-- Hero Banner -->
+<div class="recruiter-hero">
+    <div class="hero-main">
+        <div class="hero-label">🏢 Recruiter Portal</div>
+        <h1>Hello, <span>{{ session['hr_name'] }}</span></h1>
+        <p>{{ session['company_name'] }} — Placement Intelligence System</p>
+    </div>
+    <div class="hero-action">
+        <a href="{{ url_for('company.create_drive') }}" class="cta-btn">
+            ➕ Launch New Drive
         </a>
-    </header>
+        <a href="{{ url_for('company.company_logout') }}" class="logout-link">🚪 Sign out</a>
+    </div>
+</div>
 
-    <div class="gazelle-profile-card">
-        
-        <a href="{{ url_for('company.create_drive') }}" class="lion-btn lion-btn-create">
-            ➕ Launch New Recruitment Drive
-        </a>
-
-        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 1rem;">
-            <div style="width: 8px; height: 24px; background: var(--primary-gold); border-radius: 4px;"></div>
-            <h3 style="margin: 0; font-weight: 800; letter-spacing: -0.5px;">Active Company Drives</h3>
+<!-- Drives Panel -->
+<div class="gazelle-card" style="padding: 30px 32px;">
+    <div class="panel-header">
+        <div class="panel-title">
+            📢 Active Recruitment Drives
+            {% if not drives.empty %}
+            <span class="panel-count">{{ drives|length }} Active</span>
+            {% endif %}
         </div>
-
-        {% if drives.empty %}
-            <div style="text-align: center; padding: 40px; background: #fafafa; border-radius: 20px; border: 2px dashed #eee;">
-                <p class="text-muted" style="margin: 0; font-weight: 500;">No recruitment drives have been created yet.</p>
-            </div>
-        {% else %}
-            <div style="overflow-x: auto;">
-                <table class="zebra-table">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Position</th>
-                            <th>Package</th>
-                            <th>Required</th>
-                            <th>End Date</th>
-                            <th>Created At</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                    {% for i, row in drives.iterrows() %}
-                        <tr>
-                            <td>#{{ row.drive_id }}</td>
-                            <td style="font-weight: 800;">{{ row.position }}</td>
-                            <td><span class="owl-badge">{{ row.package }}</span></td>
-                            <td>{{ row.number_required }} Seats</td>
-                            <td style="color: #dc2626; font-weight: 700;">{{ row.end_date }}</td>
-                            <td>{{ row.created_at }}</td>
-                        </tr>
-                    {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        {% endif %}
-
+        <a href="{{ url_for('company.create_drive') }}" class="lion-btn" style="padding: 10px 22px; font-size: 0.82rem;">
+            ➕ New Drive
+        </a>
     </div>
 
+    {% if drives.empty %}
+    <div class="empty-state">
+        <div class="empty-icon">📋</div>
+        <h3>No Active Drives Yet</h3>
+        <p>Create your first recruitment drive to start reaching eligible students across all departments.</p>
+        <a href="{{ url_for('company.create_drive') }}" class="lion-btn">
+            🚀 Create Your First Drive
+        </a>
+    </div>
+    {% else %}
+    <div class="drives-grid">
+        {% for i, row in drives.iterrows() %}
+        <div class="drive-card" style="animation-delay: {{ loop.index * 0.07 }}s;">
+            <div class="drive-id-badge">#{{ row.drive_id }}</div>
+            <div>
+                <div class="drive-position">{{ row.position }}</div>
+                <div style="font-size: 0.78rem; color: #94a3b8; margin-top: 3px;">Posted {{ row.created_at }}</div>
+            </div>
+            <div class="drive-package">{{ row.package }}</div>
+            <div class="drive-seats">👤 {{ row.number_required }} Seats</div>
+            <div class="drive-deadline">⏰ {{ row.end_date }}</div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
 </div>
 
 {% endblock %}

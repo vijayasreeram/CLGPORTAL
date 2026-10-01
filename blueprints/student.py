@@ -614,6 +614,22 @@ def dashboard():
     # Calculate academic weaknesses to recommend resources
     weaknesses = get_student_weaknesses(student)
 
+    # ── Gamification: compute earned badges ──────────────────────
+    try:
+        from models import StudentInternship
+        verified_count = StudentInternship.query.filter_by(register_number=reg_no, status="Verified").count()
+        student["verified_internships_count"] = verified_count
+    except Exception:
+        student["verified_internships_count"] = 0
+
+    try:
+        from badge_engine import compute_badges, compute_badge_summary
+        earned_badges = compute_badges(student)
+        badge_summary = compute_badge_summary(earned_badges)
+    except Exception:
+        earned_badges = []
+        badge_summary = {"total": 0, "gold": 0, "silver": 0, "bronze": 0, "special": 0}
+
     semesters = sorted(
         [c.split("_")[0] for c in df.columns if c.startswith("Sem") and c.endswith("_GPA")],
         key=lambda x: int(x.replace("Sem", ""))
@@ -624,7 +640,9 @@ def dashboard():
         student=student,
         semesters=semesters,
         schemes=eligible_schemes,
-        weaknesses=weaknesses
+        weaknesses=weaknesses,
+        earned_badges=earned_badges,
+        badge_summary=badge_summary
     )
 
 
@@ -1141,3 +1159,336 @@ def generate_resume():
 
     c.save()
     return send_file(path, as_attachment=True)
+
+
+@student_bp.route("/resume_builder", methods=["GET", "POST"])
+@student_required
+def resume_builder():
+    from models import Student, db
+    reg_no = session["student_reg_no"]
+    student = Student.query.filter_by(register_number=reg_no).first_or_404()
+
+    if request.method == "POST":
+        # Save custom resume fields
+        student.resume_email = request.form.get("resume_email", "").strip()
+        student.resume_phone = request.form.get("resume_phone", "").strip()
+        student.resume_linkedin = request.form.get("resume_linkedin", "").strip()
+        student.resume_github = request.form.get("resume_github", "").strip()
+        student.resume_summary = request.form.get("resume_summary", "").strip()
+        student.resume_work_experience = request.form.get("resume_work_experience", "").strip()
+
+        # Save profile overrides
+        student.student_name = request.form.get("student_name", "").strip()
+        student.department = request.form.get("department", "").strip()
+        
+        try:
+            student.cgpa = float(request.form.get("cgpa", 0.0))
+        except ValueError:
+            pass
+        try:
+            student.current_sem = int(request.form.get("current_sem", 1))
+        except ValueError:
+            pass
+        try:
+            student.leetcode_problems_solved = int(request.form.get("leetcode", 0))
+        except ValueError:
+            pass
+        try:
+            student.codechef_rating = int(request.form.get("codechef", 0))
+        except ValueError:
+            pass
+        try:
+            student.hackathons_participated = int(request.form.get("hackathons", 0))
+        except ValueError:
+            pass
+        try:
+            student.research_papers_published = int(request.form.get("papers", 0))
+        except ValueError:
+            pass
+        try:
+            student.skill_index = float(request.form.get("skill_index", 0.0))
+        except ValueError:
+            pass
+
+        student.certifications_list = request.form.get("certifications", "").strip()
+
+        db.session.commit()
+        flash("Resume content and student profile updated successfully!")
+        return redirect(url_for("student.resume_builder"))
+
+    # Prepare default summary if empty
+    default_summary = student.resume_summary
+    if not default_summary:
+        dept = student.department or "Technology"
+        sem = student.current_sem or 6
+        cgpa = student.cgpa or 0.0
+        default_summary = (
+            f"Ambitious {dept} student in Semester {sem} with a CGPA of {cgpa:.2f}. "
+            f"Strong interest in tech-driven roles with proven exposure to projects, coding practice, "
+            f"certifications, and academic problem-solving."
+        )
+
+    # Parse certifications
+    certifications = []
+    if student.certifications_list:
+        certifications = [c.strip() for c in student.certifications_list.split(",") if c.strip()]
+
+    # Fetch approved certificates from database
+    try:
+        from models import Certificate
+        db_certs = Certificate.query.filter_by(register_number=reg_no, status="approved").all()
+        if db_certs:
+            certifications = [c.certificate_name for c in db_certs]
+    except Exception:
+        pass
+
+    # Fetch verified internships from database
+    verified_internships = []
+    try:
+        from models import StudentInternship
+        verified_internships = StudentInternship.query.filter_by(register_number=reg_no, status="Verified").all()
+    except Exception:
+        pass
+
+    return render_template(
+        "student_resume_builder.html",
+        student=student,
+        default_summary=default_summary,
+        certifications=certifications,
+        verified_internships=verified_internships
+    )
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# PROJECT PROPOSALS & MENTORSHIP
+# ─────────────────────────────────────────────────────────────────────────────
+
+@student_bp.route("/project_proposals", methods=["GET", "POST"])
+@student_required
+def project_proposals():
+    from models import Student, Mentor, ProjectProposal, ProjectUpdate, db
+    reg_no = session["student_reg_no"]
+    student = Student.query.filter_by(register_number=reg_no).first_or_404()
+
+    # Dynamic project upload directory
+    PROJECT_UPLOAD_DIR = os.path.join(DATA_DIR, "projects")
+    os.makedirs(PROJECT_UPLOAD_DIR, exist_ok=True)
+
+    if request.method == "POST":
+        action = request.form.get("action", "")
+
+        if action == "submit":
+            title = request.form.get("project_title", "").strip()
+            desc = request.form.get("description", "").strip()
+            domain = request.form.get("domain", "").strip()
+            file = request.files.get("project_ppt")
+
+            if not title or not desc or not domain or not file:
+                flash("All fields and a PPT file upload are required to submit.")
+                return redirect(url_for("student.project_proposals"))
+
+            # Save the PPT file
+            filename = f"{reg_no}_{int(datetime.now().timestamp())}_{secure_filename(file.filename)}"
+            file.save(os.path.join(PROJECT_UPLOAD_DIR, filename))
+
+            # Create proposal
+            proposal = ProjectProposal(
+                register_number=reg_no,
+                project_title=title,
+                description=desc,
+                domain=domain,
+                ppt_path=filename,
+                status="Pending Review"
+            )
+            db.session.add(proposal)
+            db.session.commit()
+            flash("Project proposal submitted successfully!")
+            return redirect(url_for("student.project_proposals"))
+
+        elif action == "select_mentor":
+            proposal_id = request.form.get("proposal_id")
+            mentor_id = request.form.get("mentor_id")
+
+            proposal = ProjectProposal.query.get_or_404(proposal_id)
+            if proposal.register_number != reg_no:
+                flash("Unauthorized request.")
+                return redirect(url_for("student.project_proposals"))
+
+            mentor = Mentor.query.get_or_404(mentor_id)
+            if mentor.current_slots >= mentor.max_slots:
+                flash("This mentor has no available slots. Please choose another mentor.")
+                return redirect(url_for("student.project_proposals"))
+
+            # Assign mentor and update status
+            proposal.mentor_id = mentor.id
+            proposal.status = "Mentorship Active"
+            mentor.current_slots += 1
+            db.session.commit()
+            flash(f"Successfully selected {mentor.name} as your mentor!")
+            return redirect(url_for("student.project_proposals"))
+
+        elif action == "log_progress":
+            proposal_id = request.form.get("proposal_id")
+            update_text = request.form.get("update_text", "").strip()
+
+            if not update_text:
+                flash("Progress update content cannot be empty.")
+                return redirect(url_for("student.project_proposals"))
+
+            proposal = ProjectProposal.query.get_or_404(proposal_id)
+            if proposal.register_number != reg_no:
+                flash("Unauthorized request.")
+                return redirect(url_for("student.project_proposals"))
+
+            # Determine week number
+            last_update = ProjectUpdate.query.filter_by(proposal_id=proposal_id).order_by(ProjectUpdate.week_no.desc()).first()
+            next_week = (last_update.week_no + 1) if last_update else 1
+
+            # Log update
+            p_update = ProjectUpdate(
+                proposal_id=proposal_id,
+                week_no=next_week,
+                update_text=update_text
+            )
+            db.session.add(p_update)
+            db.session.commit()
+            flash(f"Logged progress update for Week {next_week} successfully!")
+            return redirect(url_for("student.project_proposals"))
+
+    # Fetch active proposals and available mentors
+    proposals = ProjectProposal.query.filter_by(register_number=reg_no).order_by(ProjectProposal.submitted_at.desc()).all()
+    mentors = Mentor.query.filter(Mentor.current_slots < Mentor.max_slots).all()
+
+    return render_template(
+        "student_project_proposals.html",
+        student=student,
+        proposals=proposals,
+        mentors=mentors
+    )
+
+
+@student_bp.route("/download_project_ppt/<int:proposal_id>")
+@student_required
+def download_project_ppt(proposal_id):
+    from models import ProjectProposal
+    proposal = ProjectProposal.query.get_or_404(proposal_id)
+    
+    # Check authorization (Student can only download their own PPT, admin can download any)
+    if "student_reg_no" in session and proposal.register_number != session["student_reg_no"]:
+        return "Unauthorized", 403
+
+    PROJECT_UPLOAD_DIR = os.path.join(DATA_DIR, "projects")
+    file_path = os.path.join(PROJECT_UPLOAD_DIR, proposal.ppt_path)
+    if not os.path.exists(file_path):
+        return "File not found", 404
+
+    return send_file(file_path, as_attachment=True)
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# NOTIFICATION CENTRE
+# ─────────────────────────────────────────────────────────────────────────────
+
+@student_bp.route("/notifications")
+@student_required
+def notifications():
+    from models import Notification, db
+    reg_no = session["student_reg_no"]
+
+    # Fetch: personal notifications + broadcast (register_number IS NULL)
+    notifs = Notification.query.filter(
+        (Notification.register_number == reg_no) |
+        (Notification.register_number == None)
+    ).order_by(Notification.created_at.desc()).all()
+
+    unread_count = sum(1 for n in notifs if not n.is_read)
+    return render_template("student_notifications.html",
+                           notifications=notifs,
+                           unread_count=unread_count)
+
+
+@student_bp.route("/notifications/mark_read/<int:notif_id>", methods=["POST"])
+@student_required
+def mark_notification_read(notif_id):
+    from models import Notification, db
+    reg_no = session["student_reg_no"]
+    notif = Notification.query.get_or_404(notif_id)
+    # Authorise: student owns it OR it's a broadcast
+    if notif.register_number is None or notif.register_number == reg_no:
+        notif.is_read = True
+        db.session.commit()
+    return redirect(url_for("student.notifications"))
+
+
+@student_bp.route("/notifications/mark_all_read", methods=["POST"])
+@student_required
+def mark_all_notifications_read():
+    from models import Notification, db
+    reg_no = session["student_reg_no"]
+    Notification.query.filter(
+        (Notification.register_number == reg_no) |
+        (Notification.register_number == None),
+        Notification.is_read == False
+    ).update({"is_read": True}, synchronize_session=False)
+    db.session.commit()
+    flash("All notifications marked as read.")
+    return redirect(url_for("student.notifications"))
+
+
+@student_bp.context_processor
+def inject_unread_notif_count():
+    """Injects unread_notif_count into every student template."""
+    count = 0
+    try:
+        if "student_reg_no" in session:
+            from models import Notification
+            reg_no = session["student_reg_no"]
+            count = Notification.query.filter(
+                (Notification.register_number == reg_no) |
+                (Notification.register_number == None),
+                Notification.is_read == False
+            ).count()
+    except Exception:
+        pass
+    return dict(unread_notif_count=count)
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# INTERNSHIP TRACKER
+# ─────────────────────────────────────────────────────────────────────────────
+
+@student_bp.route("/internships", methods=["GET", "POST"])
+@student_required
+def internships():
+    from models import StudentInternship, db, Student
+    reg_no = session["student_reg_no"]
+    student = Student.query.filter_by(register_number=reg_no).first_or_404()
+
+    if request.method == "POST":
+        company_name = request.form.get("company_name", "").strip()
+        role         = request.form.get("role", "").strip()
+        duration     = request.form.get("duration", "").strip()
+        stipend      = request.form.get("stipend", "").strip()
+        mode         = request.form.get("mode", "Onsite").strip()
+
+        if not company_name or not role or not duration:
+            flash("❌ Company name, role, and duration are required.")
+            return redirect(url_for("student.internships"))
+
+        new_internship = StudentInternship(
+            register_number=reg_no,
+            company_name=company_name,
+            role=role,
+            duration=duration,
+            stipend=stipend or "Unpaid",
+            mode=mode,
+            status="Pending Verification"
+        )
+        db.session.add(new_internship)
+        db.session.commit()
+        flash("🎉 Internship logged successfully! Awaiting administrator verification.")
+        return redirect(url_for("student.internships"))
+
+    my_internships = StudentInternship.query.filter_by(register_number=reg_no).order_by(StudentInternship.submitted_at.desc()).all()
+    return render_template("student_internships.html", student=student, internships=my_internships)
+

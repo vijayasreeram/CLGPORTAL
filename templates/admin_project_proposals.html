@@ -1,0 +1,210 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="giraffe-header">
+    <h2>Project <span>Proposals & Reviews</span></h2>
+    <p>Admin panel to evaluate student academic project submissions, assign feedback, and oversee guide distributions.</p>
+</div>
+
+<!-- Nexora Summary Stat Cards Grid -->
+<div class="nexora-stat-grid">
+    <div class="nexora-stat-card card-blue">
+        <div class="nexora-icon">📊</div>
+        <div>
+            <div style="font-size: 1.8rem; font-weight: 800; color: var(--primary-navy);">
+                {{ pending|length + approved|length + others|length }}
+            </div>
+            <div style="font-size: 0.8rem; color: #64748b; font-weight: 700; text-transform: uppercase;">Total Requests</div>
+        </div>
+    </div>
+    
+    <div class="nexora-stat-card card-green">
+        <div class="nexora-icon">✓</div>
+        <div>
+            <div style="font-size: 1.8rem; font-weight: 800; color: var(--primary-navy);">
+                {{ approved|length }}
+            </div>
+            <div style="font-size: 0.8rem; color: #64748b; font-weight: 700; text-transform: uppercase;">Approved</div>
+        </div>
+    </div>
+
+    <div class="nexora-stat-card card-yellow">
+        <div class="nexora-icon">⏳</div>
+        <div>
+            <div style="font-size: 1.8rem; font-weight: 800; color: var(--primary-navy);">
+                {{ pending|length }}
+            </div>
+            <div style="font-size: 0.8rem; color: #64748b; font-weight: 700; text-transform: uppercase;">Pending</div>
+        </div>
+    </div>
+
+    <div class="nexora-stat-card card-red">
+        <div class="nexora-icon">✗</div>
+        <div>
+            <div style="font-size: 1.8rem; font-weight: 800; color: var(--primary-navy);">
+                {{ others|selectattr('status', 'equalto', 'Rejected')|list|length }}
+            </div>
+            <div style="font-size: 0.8rem; color: #64748b; font-weight: 700; text-transform: uppercase;">Rejected</div>
+        </div>
+    </div>
+</div>
+
+{% with messages = get_flashed_messages() %}
+    {% if messages %}
+        {% for message in messages %}
+            <div style="background: #fffaf0; border-left: 4px solid var(--primary-gold); color: #c05621; padding: 15px; border-radius: 12px; font-weight: 700; font-size: 0.9rem; margin-bottom: 20px;">
+                ⚡ {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+{% endwith %}
+
+<!-- Pending Proposals Section -->
+<div class="gazelle-card">
+    <h3 style="margin-top:0; margin-bottom:20px; font-size:1.4rem; color:var(--dark); display: flex; align-items: center; gap: 8px;">⏳ Pending Concept Proposals <span class="owl-badge" style="font-size: 0.8rem;">{{ pending|length }}</span></h3>
+    {% if pending %}
+        <table class="zebra-table" style="width:100%;">
+            <thead>
+                <tr>
+                    <th>Student Details</th>
+                    <th>Project Concept Info</th>
+                    <th>Concept File</th>
+                    <th style="text-align:right;">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for prop in pending %}
+                    <tr>
+                        <td>
+                            <b>{{ prop.student.student_name }}</b><br>
+                            <span style="font-size:0.8rem; color:#888;">Reg No: {{ prop.register_number }} ({{ prop.student.department }})</span>
+                        </td>
+                        <td>
+                            <b style="font-size:1.05rem; color:var(--dark);">{{ prop.project_title }}</b><br>
+                            <span class="owl-badge" style="font-size:0.75rem; margin-top:4px;">Domain: {{ prop.domain }}</span>
+                            <p style="margin:6px 0 0 0; font-size:0.85rem; color:#555; font-weight:normal;">{{ prop.description }}</p>
+                        </td>
+                        <td>
+                            <a href="{{ url_for('student.download_project_ppt', proposal_id=prop.id) }}" class="lion-btn-clear" style="margin-left:0; display:inline-flex; align-items:center; gap:5px; font-size:0.85rem;">
+                                📥 Download PPT
+                            </a>
+                        </td>
+                        <td style="text-align:right; vertical-align:middle;">
+                            <!-- Inline Action Form -->
+                            <form action="{{ url_for('admin.review_proposal', proposal_id=prop.id) }}" method="POST" style="display:inline-block; text-align:left; background:rgba(0,0,0,0.01); padding:10px; border-radius:12px; border:1px solid #eee;">
+                                <div style="display:flex; flex-direction:column; gap:6px;">
+                                    <input type="text" name="remarks" placeholder="Enter evaluation remarks..." class="panther-input" style="padding:6px 10px; font-size:0.8rem;" required>
+                                    <div style="display:flex; gap:6px; justify-content:flex-end;">
+                                        <button type="submit" name="action" value="reject" class="nexora-action-pill reject">✖ Reject</button>
+                                        <button type="submit" name="action" value="approve" class="nexora-action-pill approve">✔ Approve</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p style="color:#999; font-style:italic;">No pending project proposals to review.</p>
+    {% endif %}
+</div>
+
+<!-- Active Mentorships Section -->
+<div class="gazelle-card">
+    <h3 style="margin-top:0; margin-bottom:20px; font-size:1.4rem; color:var(--dark);">🚀 Approved & Active Mentorships ({{ approved|length }})</h3>
+    {% if approved %}
+        <table class="zebra-table" style="width:100%;">
+            <thead>
+                <tr>
+                    <th>Student Details</th>
+                    <th>Project Concept Info</th>
+                    <th>Status</th>
+                    <th>Assigned Faculty Guide</th>
+                    <th style="text-align:right;">Milestone Logs</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for prop in approved %}
+                    <tr>
+                        <td>
+                            <b>{{ prop.student.student_name }}</b><br>
+                            <span style="font-size:0.8rem; color:#888;">Reg No: {{ prop.register_number }} ({{ prop.student.department }})</span>
+                        </td>
+                        <td>
+                            <b style="font-size:1.05rem; color:var(--dark);">{{ prop.project_title }}</b><br>
+                            <span style="font-size:0.8rem; color:#777;">Domain: <b>{{ prop.domain }}</b></span>
+                        </td>
+                        <td>
+                            {% if prop.status == 'Approved - Select Mentor' %}
+                                <span class="owl-badge" style="background:#ebf8ff; color:#2b6cb0;">Approved - Selecting Guide</span>
+                            {% elif prop.status == 'Mentorship Active' %}
+                                <span class="owl-badge" style="background:#e6fffa; color:#319795;">Active Guidance</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if prop.mentor %}
+                                <b>{{ prop.mentor.name }}</b><br>
+                                <span style="font-size:0.8rem; color:#666;">{{ prop.mentor.designation }} ({{ prop.mentor.department }})</span>
+                            {% else %}
+                                <span style="color:#bbb; font-style:italic;">No guide selected yet</span>
+                            {% endif %}
+                        </td>
+                        <td style="text-align:right; vertical-align:middle;">
+                            <a href="{{ url_for('admin.project_updates', proposal_id=prop.id) }}" class="lion-btn" style="padding:8px 16px; font-size:0.8rem; border-radius:10px; text-decoration:none;">
+                                👁️ View logs ({{ prop.updates|length }})
+                            </a>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p style="color:#999; font-style:italic;">No active project mentorships currently.</p>
+    {% endif %}
+</div>
+
+<!-- Evaluation History Card -->
+<div class="gazelle-card">
+    <h3 style="margin-top:0; margin-bottom:20px; font-size:1.4rem; color:var(--dark);">📂 Project Evaluation History ({{ others|length }})</h3>
+    {% if others %}
+        <table class="zebra-table" style="width:100%;">
+            <thead>
+                <tr>
+                    <th>Student Details</th>
+                    <th>Project Concept Info</th>
+                    <th>Status</th>
+                    <th>Remarks</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for prop in others %}
+                    <tr>
+                        <td>
+                            <b>{{ prop.student.student_name }}</b><br>
+                            <span style="font-size:0.8rem; color:#888;">Reg No: {{ prop.register_number }}</span>
+                        </td>
+                        <td>
+                            <b style="color:var(--dark);">{{ prop.project_title }}</b><br>
+                            <span style="font-size:0.8rem; color:#777;">Domain: {{ prop.domain }}</span>
+                        </td>
+                        <td>
+                            {% if prop.status == 'Rejected' %}
+                                <span class="owl-badge" style="background:#fff5f5; color:#e53e3e;">Rejected</span>
+                            {% elif prop.status == 'Completed' %}
+                                <span class="owl-badge" style="background:#e6fffa; color:#319795;">Completed</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <p style="margin:0; font-size:0.85rem; color:#555;">{{ prop.remarks or 'No remarks provided.' }}</p>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p style="color:#999; font-style:italic;">No historical proposals in archive.</p>
+    {% endif %}
+</div>
+
+{% endblock %}

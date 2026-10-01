@@ -57,15 +57,53 @@ def home():
 # -----------------------------------------------
 with app.app_context():
     db.create_all()                        # create tables if they don't exist
+    
+    # ── Database schema patch ─────────────────────────────────────────────
+    try:
+        from sqlalchemy import text
+        with db.engine.connect() as conn:
+            for col, col_type in [
+                ("resume_email", "VARCHAR(100)"),
+                ("resume_phone", "VARCHAR(50)"),
+                ("resume_linkedin", "VARCHAR(200)"),
+                ("resume_github", "VARCHAR(200)"),
+                ("resume_summary", "TEXT"),
+                ("resume_work_experience", "TEXT")
+            ]:
+                try:
+                    conn.execute(text(f"ALTER TABLE students ADD COLUMN {col} {col_type}"))
+                    conn.commit()
+                except Exception:
+                    pass  # Column already exists
+    except Exception as _schema_err:
+        print(f"[Schema Patch Warning] {_schema_err}")
+
     _sentinel = os.path.join(DATA_DIR, ".db_migrated")
     if not os.path.exists(_sentinel):
         try:
             from db_init import run_migration
-            print("\n🔄 First run — migrating CSV data to SQLite...\n")
+            print("\n[Migration] First run -- migrating CSV data to SQLite...\n")
             run_migration(app, db)
             open(_sentinel, "w").write("done")    # mark migration as done
         except Exception as _e:
-            print(f"⚠️  Migration warning: {_e}")
+            print(f"[Migration Warning] {_e}")
+
+    # Seed sample Mentors if empty
+    try:
+        from models import Mentor
+        if Mentor.query.count() == 0:
+            db.session.add_all([
+                Mentor(name="Dr. Arul Prasad", email="arul.prasad@cit.edu", department="CSE", designation="Associate Professor", expertise="Machine Learning, Deep Learning, NLP", max_slots=5),
+                Mentor(name="Prof. Meera Nair", email="meera.nair@cit.edu", department="IT", designation="Assistant Professor", expertise="Full Stack Web Dev, Cloud Computing, DevOps", max_slots=5),
+                Mentor(name="Dr. Rajesh Kumar", email="rajesh.kumar@cit.edu", department="ECE", designation="Professor", expertise="IoT, Embedded Systems, Robotics", max_slots=5),
+                Mentor(name="Prof. Sarah D'Souza", email="sarah.dsouza@cit.edu", department="CSE", designation="Assistant Professor", expertise="Cyber Security, Cryptography, Blockchain", max_slots=5)
+            ])
+            db.session.commit()
+            print("[Mentors Seed] Seeded sample faculty mentors successfully!")
+    except Exception as _seed_err:
+        print(f"[Mentors Seed Warning] Seeding mentors failed: {_seed_err}")
+
+
 
 
 if __name__ == "__main__":

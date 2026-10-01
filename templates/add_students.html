@@ -2,133 +2,366 @@
 {% block content %}
 
 <style>
-    :root {
-        --primary-gold: #e2b04a; 
-        --bg-soft: #fcfbf7;
-        --white: #ffffff;
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
+    .page-wrapper {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 50px 30px;
+        font-family: 'Plus Jakarta Sans', sans-serif;
     }
 
-    /* Container: "Elephant" */
-    .elephant-container {
+    .page-header { margin-bottom: 40px; }
+    .page-header h2 { font-size: 2.8rem; font-weight: 800; color: #1a1a1a; margin: 0; letter-spacing: -1.5px; }
+    .page-header h2 span { color: #e2b04a; }
+    .page-header p { color: #888; font-size: 1rem; margin-top: 6px; font-weight: 500; }
+
+    /* Tabs */
+    .tab-bar {
         display: flex;
-        justify-content: center;
-        align-items: center;
-        min-height: 80vh;
-        font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        gap: 8px;
+        margin-bottom: 30px;
+        background: #f5f4f0;
+        padding: 6px;
+        border-radius: 18px;
+        width: fit-content;
     }
-
-    /* Card: "Gazelle" */
-    .gazelle-card {
-        background: var(--white);
-        padding: 3.5rem;
-        border-radius: 30px;
-        box-shadow: 0 25px 50px rgba(0,0,0,0.04);
-        border: 1px solid rgba(226, 176, 74, 0.15);
-        width: 100%;
-        max-width: 450px;
-        text-align: center;
-        transition: all 0.4s ease;
-    }
-
-    .gazelle-card:hover {
-        transform: translateY(-10px);
-        box-shadow: 0 30px 60px rgba(226, 176, 74, 0.1);
-    }
-
-    h2 {
-        color: #2d2d2d;
-        font-weight: 800;
-        margin-bottom: 2rem;
-        font-size: 2rem;
-        letter-spacing: -0.5px;
-    }
-
-    /* Form Area: "Leopard" */
-    .leopard-form {
-        display: flex;
-        flex-direction: column;
-        gap: 2rem;
-    }
-
-    .cheetah-label {
-        font-weight: 600;
-        color: #555;
-        display: block;
-        margin-bottom: 0.8rem;
+    .tab-btn {
+        padding: 12px 28px;
+        border-radius: 14px;
+        border: none;
+        background: transparent;
+        font-weight: 700;
         font-size: 0.95rem;
-    }
-
-    /* File Input Styling: "Fox" */
-    .fox-input-wrapper {
-        position: relative;
-        border: 2px dashed rgba(226, 176, 74, 0.4);
-        padding: 2.5rem 1rem;
-        border-radius: 20px;
-        background: #fffefb;
+        cursor: pointer;
+        color: #888;
         transition: all 0.3s ease;
+        font-family: inherit;
     }
-
-    .fox-input-wrapper:hover {
-        border-color: var(--primary-gold);
-        background: #fff9ed;
-        transform: scale(1.02);
-    }
-
-    /* Button: "Lion" */
-    .lion-button {
-        background-color: #1a1a1a;
+    .tab-btn.active {
+        background: #1a1a1a;
         color: white;
-        padding: 16px 32px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+    .tab-btn:not(.active):hover { background: #eee; color: #444; }
+
+    /* Panels */
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    /* Cards */
+    .form-card {
+        background: #fff;
+        border-radius: 28px;
+        border: 1px solid rgba(226,176,74,0.12);
+        box-shadow: 0 15px 40px rgba(0,0,0,0.04);
+        padding: 40px;
+    }
+
+    /* Grid for form fields */
+    .form-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .form-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; }
+    .form-full    { grid-column: 1 / -1; }
+
+    .field-group { display: flex; flex-direction: column; gap: 6px; }
+    .field-group label {
+        font-weight: 700;
+        font-size: 0.82rem;
+        color: #777;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    .field-group input,
+    .field-group select,
+    .field-group textarea {
+        border: 1.5px solid #e8e8e8;
+        border-radius: 14px;
+        padding: 12px 16px;
+        font-size: 0.95rem;
+        font-family: inherit;
+        background: #fafafa;
+        color: #1a1a1a;
+        transition: all 0.25s ease;
+        outline: none;
+    }
+    .field-group input:focus,
+    .field-group select:focus,
+    .field-group textarea:focus {
+        border-color: #e2b04a;
+        background: #fff;
+        box-shadow: 0 0 0 4px rgba(226,176,74,0.1);
+    }
+    .field-group input[type="number"] { -moz-appearance: textfield; }
+
+    /* Section dividers */
+    .section-label {
+        font-weight: 800;
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        color: #e2b04a;
+        margin: 30px 0 16px 0;
+        padding-bottom: 8px;
+        border-bottom: 1px solid rgba(226,176,74,0.2);
+    }
+
+    /* Submit button */
+    .submit-btn {
+        margin-top: 30px;
+        width: 100%;
+        padding: 17px;
+        background: #1a1a1a;
+        color: white;
         border: none;
         border-radius: 50px;
-        font-weight: 700;
         font-size: 1rem;
+        font-weight: 700;
         cursor: pointer;
+        font-family: inherit;
         transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         box-shadow: 0 10px 20px rgba(0,0,0,0.1);
     }
-
-    .lion-button:hover {
-        background-color: var(--primary-gold);
-        transform: scale(1.05);
-        box-shadow: 0 15px 25px rgba(226, 176, 74, 0.3);
+    .submit-btn:hover {
+        background: #e2b04a;
+        transform: translateY(-2px);
+        box-shadow: 0 15px 30px rgba(226,176,74,0.3);
     }
 
-    /* Tip box: "Owl" */
-    .owl-info {
-        margin-top: 2.5rem;
-        padding: 1.2rem;
+    /* CSV Card */
+    .csv-card {
+        background: #fff;
+        border-radius: 28px;
+        border: 1px solid rgba(226,176,74,0.12);
+        box-shadow: 0 15px 40px rgba(0,0,0,0.04);
+        padding: 50px 40px;
+        max-width: 520px;
+    }
+    .dropzone {
+        border: 2px dashed rgba(226,176,74,0.4);
+        border-radius: 20px;
+        padding: 45px 20px;
+        background: #fffefb;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    .dropzone:hover { border-color: #e2b04a; background: #fff9ed; }
+    .dropzone input[type="file"] {
+        position: absolute; width: 1px; height: 1px; opacity: 0;
+    }
+    .dropzone-label {
+        cursor: pointer;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+    }
+    .dropzone-icon { font-size: 3rem; }
+    .dropzone-text { font-weight: 700; color: #444; font-size: 1rem; }
+    .dropzone-sub  { font-size: 0.85rem; color: #999; }
+    .dropzone-chosen { font-size: 0.85rem; color: #e2b04a; font-weight: 700; margin-top: 6px; display: none; }
+
+    /* Tip box */
+    .tip-box {
+        margin-top: 20px;
+        padding: 16px 20px;
         background: #fff9e6;
-        border-radius: 15px;
+        border-radius: 14px;
         font-size: 0.85rem;
         color: #7d6320;
-        line-height: 1.5;
-        border: 1px solid rgba(226, 176, 74, 0.2);
+        border: 1px solid rgba(226,176,74,0.2);
+        line-height: 1.6;
+    }
+
+    /* Flash messages */
+    .flash-msg {
+        background: #fffaf0;
+        border-left: 4px solid #e2b04a;
+        color: #c05621;
+        padding: 14px 18px;
+        border-radius: 12px;
+        font-weight: 700;
+        font-size: 0.9rem;
+        margin-bottom: 24px;
     }
 </style>
 
-<div class="elephant-container">
-    <div class="gazelle-card">
-        <h2>Add Students</h2>
-        
-        <form method="POST" enctype="multipart/form-data" class="leopard-form">
-            <div>
-                <label class="cheetah-label">Select CSV Database File</label>
-                <div class="fox-input-wrapper">
-                    <input type="file" name="file" accept=".csv" required>
-                </div>
-            </div>
-            
-            <button type="submit" class="lion-button">
-                Upload & Sync Data
-            </button>
-        </form>
+<div class="page-wrapper">
+    <div class="page-header">
+        <h2>Enroll <span>Students</span></h2>
+        <p>Add a single student manually or bulk-import via a CSV database file.</p>
+    </div>
 
-        <div class="owl-info">
-            <strong>💡 Quick Tip:</strong><br>
-            The uploaded data will be merged into the master CSV file automatically.
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            {% for msg in messages %}
+                <div class="flash-msg">⚡ {{ msg }}</div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <!-- Tabs -->
+    <div class="tab-bar">
+        <button class="tab-btn active" onclick="switchTab('manual', this)">✏️ Manual Entry</button>
+        <button class="tab-btn" onclick="switchTab('csv', this)">📂 CSV Upload</button>
+    </div>
+
+    <!-- ─── MANUAL ENTRY PANEL ─── -->
+    <div id="panel-manual" class="tab-panel active">
+        <div class="form-card">
+            <form method="POST" enctype="multipart/form-data">
+                <input type="hidden" name="input_method" value="manual">
+
+                <!-- Identity -->
+                <div class="section-label">🎓 Student Identity</div>
+                <div class="form-grid-2">
+                    <div class="field-group">
+                        <label>Register Number *</label>
+                        <input type="text" name="register_number" placeholder="e.g. CIT22CS001" required>
+                    </div>
+                    <div class="field-group">
+                        <label>Full Name *</label>
+                        <input type="text" name="student_name" placeholder="e.g. Vijayasree R" required>
+                    </div>
+                    <div class="field-group">
+                        <label>Department *</label>
+                        <select name="department" required>
+                            <option value="" disabled selected>Select department...</option>
+                            <option value="CSE">CSE</option>
+                            <option value="IT">IT</option>
+                            <option value="ECE">ECE</option>
+                            <option value="EEE">EEE</option>
+                            <option value="MECH">MECH</option>
+                            <option value="CIVIL">CIVIL</option>
+                        </select>
+                    </div>
+                    <div class="field-group">
+                        <label>Batch / Year</label>
+                        <input type="text" name="batch" placeholder="e.g. 2022-2026">
+                    </div>
+                    <div class="field-group">
+                        <label>Gender</label>
+                        <select name="gender">
+                            <option value="" disabled selected>Select...</option>
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                        </select>
+                    </div>
+                    <div class="field-group">
+                        <label>Current Semester</label>
+                        <input type="number" name="current_sem" placeholder="e.g. 6" min="1" max="8">
+                    </div>
+                    <div class="field-group form-full">
+                        <label>Foreign Language Known</label>
+                        <input type="text" name="foreign_language_known" placeholder="e.g. French, Japanese (leave blank if none)">
+                    </div>
+                </div>
+
+                <!-- Academics -->
+                <div class="section-label">📊 Academic Performance</div>
+                <div class="form-grid-3">
+                    <div class="field-group">
+                        <label>CGPA</label>
+                        <input type="number" name="cgpa" placeholder="e.g. 8.72" step="0.01" min="0" max="10">
+                    </div>
+                    <div class="field-group">
+                        <label>Weekly Aptitude Avg (%)</label>
+                        <input type="number" name="weekly_aptitude_avg" placeholder="e.g. 78.5" step="0.1" min="0" max="100">
+                    </div>
+                    <div class="field-group">
+                        <label>Avg Communication Score</label>
+                        <input type="number" name="avg_communication_score" placeholder="e.g. 82.0" step="0.1" min="0" max="100">
+                    </div>
+                </div>
+
+                <!-- Skills & Achievements -->
+                <div class="section-label">🏆 Skills & Achievements</div>
+                <div class="form-grid-3">
+                    <div class="field-group">
+                        <label>Projects Done</label>
+                        <input type="number" name="projects_done" placeholder="0" min="0">
+                    </div>
+                    <div class="field-group">
+                        <label>Hackathons Participated</label>
+                        <input type="number" name="hackathons_participated" placeholder="0" min="0">
+                    </div>
+                    <div class="field-group">
+                        <label>Hackathons Won (Top 100)</label>
+                        <input type="number" name="hackathons_won_top100" placeholder="0" min="0">
+                    </div>
+                    <div class="field-group">
+                        <label>LeetCode Problems Solved</label>
+                        <input type="number" name="leetcode_problems_solved" placeholder="0" min="0">
+                    </div>
+                    <div class="field-group">
+                        <label>CodeChef Rating</label>
+                        <input type="number" name="codechef_rating" placeholder="0" min="0">
+                    </div>
+                    <div class="field-group">
+                        <label>Research Papers Published</label>
+                        <input type="number" name="research_papers_published" placeholder="0" min="0">
+                    </div>
+                </div>
+
+                <!-- Certifications -->
+                <div class="section-label">📜 Certifications</div>
+                <div class="form-grid-2">
+                    <div class="field-group">
+                        <label>Number of Certifications</label>
+                        <input type="number" name="number_of_certifications" placeholder="0" min="0">
+                    </div>
+                    <div class="field-group form-full">
+                        <label>Certifications List (comma-separated)</label>
+                        <input type="text" name="certifications_list" placeholder="e.g. AWS Cloud Foundations, Python for Data Science, ...">
+                    </div>
+                </div>
+
+                <div class="tip-box">
+                    💡 <strong>Default Login:</strong> The student's initial password will be set to their <strong>Register Number</strong>. They can change it after logging in.
+                </div>
+
+                <button type="submit" class="submit-btn">➕ Add Student to Portal</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- ─── CSV UPLOAD PANEL ─── -->
+    <div id="panel-csv" class="tab-panel">
+        <div class="csv-card">
+            <form method="POST" enctype="multipart/form-data">
+                <input type="hidden" name="input_method" value="csv">
+
+                <div class="dropzone" id="dropzone">
+                    <label for="csvfile" class="dropzone-label">
+                        <span class="dropzone-icon">📂</span>
+                        <span class="dropzone-text">Click to select a CSV file</span>
+                        <span class="dropzone-sub">or drag and drop it here</span>
+                        <span class="dropzone-chosen" id="filename-display"></span>
+                    </label>
+                    <input type="file" id="csvfile" name="file" accept=".csv" required
+                           onchange="document.getElementById('filename-display').style.display='block';
+                                     document.getElementById('filename-display').textContent='Selected: ' + this.files[0].name;">
+                </div>
+
+                <div class="tip-box" style="margin-top: 20px;">
+                    💡 <strong>Quick Tip:</strong> The uploaded data will be <strong>merged</strong> into the master student database. Existing students are updated; new Register Numbers are added as new entries.
+                </div>
+
+                <button type="submit" class="submit-btn">⬆️ Upload & Sync CSV Data</button>
+            </form>
         </div>
     </div>
 </div>
+
+<script>
+function switchTab(panel, btn) {
+    // Hide all panels and deactivate all buttons
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    // Activate selected
+    document.getElementById('panel-' + panel).classList.add('active');
+    btn.classList.add('active');
+}
+</script>
 
 {% endblock %}

@@ -1,0 +1,1145 @@
+{% extends "student_base.html" %}
+{% block content %}
+
+<style>
+    /* ── Split Layout Container ── */
+    .builder-container {
+        display: grid;
+        grid-template-columns: 420px 1fr;
+        gap: 25px;
+        max-width: 1400px;
+        margin: 1rem auto;
+        padding: 0 15px;
+        align-items: start;
+    }
+
+    /* ── Sidebar Editor ── */
+    .editor-pane {
+        background: rgba(255, 255, 255, 0.85);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(226, 176, 74, 0.12);
+        padding: 24px;
+        border-radius: 24px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.03);
+        max-height: 85vh;
+        overflow-y: auto;
+    }
+
+    .editor-pane::-webkit-scrollbar {
+        width: 6px;
+    }
+    .editor-pane::-webkit-scrollbar-thumb {
+        background: #ddd;
+        border-radius: 10px;
+    }
+
+    .section-title {
+        font-size: 1.05rem;
+        font-weight: 800;
+        color: var(--dark);
+        margin: 1.5rem 0 0.8rem 0;
+        border-bottom: 2px solid rgba(226, 176, 74, 0.2);
+        padding-bottom: 5px;
+    }
+    .section-title:first-of-type {
+        margin-top: 0;
+    }
+
+    .form-group {
+        margin-bottom: 12px;
+    }
+
+    .form-group label {
+        display: block;
+        font-size: 0.8rem;
+        font-weight: 700;
+        color: #555;
+        margin-bottom: 4px;
+    }
+
+    .form-group input, .form-group textarea {
+        width: 100%;
+        background: #f9f9f9;
+        border: 1.5px solid #eee;
+        padding: 10px 14px;
+        border-radius: 12px;
+        font-weight: 600;
+        font-family: inherit;
+        font-size: 0.85rem;
+        outline: none;
+        box-sizing: border-box;
+        transition: all 0.3s ease;
+    }
+
+    .form-group input:focus, .form-group textarea:focus {
+        border-color: var(--primary-gold);
+        background: white;
+        box-shadow: 0 0 10px rgba(226, 176, 74, 0.1);
+    }
+
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+    }
+
+    /* ── Controls Row ── */
+    .controls-row {
+        background: rgba(255, 255, 255, 0.85);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(226, 176, 74, 0.12);
+        padding: 16px 24px;
+        border-radius: 20px;
+        margin-bottom: 20px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.03);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 15px;
+    }
+
+    .template-selector {
+        display: flex;
+        gap: 8px;
+    }
+
+    .tmpl-btn {
+        background: #f5f5f5;
+        border: 1px solid #ddd;
+        padding: 8px 16px;
+        border-radius: 30px;
+        font-weight: 700;
+        font-size: 0.8rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .tmpl-btn.active {
+        background: var(--dark);
+        color: white;
+        border-color: var(--dark);
+    }
+
+    .action-btn {
+        background: var(--primary-gold);
+        color: var(--dark);
+        border: none;
+        padding: 10px 22px;
+        border-radius: 30px;
+        font-weight: 800;
+        font-size: 0.85rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    .action-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(226, 176, 74, 0.25);
+    }
+
+    /* ── Preview Sheet Container ── */
+    .preview-pane {
+        display: flex;
+        justify-content: center;
+        background: #eaeaea;
+        padding: 30px;
+        border-radius: 24px;
+        box-shadow: inset 0 0 20px rgba(0,0,0,0.05);
+        overflow-x: auto;
+    }
+
+    /* ── Standard A4 Page Sheet ── */
+    .resume-sheet {
+        width: 210mm;
+        height: 297mm;
+        background: white;
+        color: #333;
+        box-shadow: 0 15px 45px rgba(0,0,0,0.1);
+        box-sizing: border-box;
+        position: relative;
+        overflow: hidden;
+        font-family: 'Inter', sans-serif;
+        text-align: left;
+    }
+
+    /* =========================================================================
+       LAYOUT 1: ACADEMIC (Minimalist / Structured)
+       ========================================================================= */
+    .resume-sheet.layout-academic {
+        padding: 20mm;
+    }
+    .layout-academic .header {
+        text-align: center;
+        border-bottom: 2px solid #333;
+        padding-bottom: 12px;
+        margin-bottom: 20px;
+    }
+    .layout-academic .header h1 {
+        margin: 0 0 6px 0;
+        font-size: 2.2rem;
+        font-weight: 800;
+        letter-spacing: -0.5px;
+        color: #111;
+    }
+    .layout-academic .header .sub-contact {
+        font-size: 0.85rem;
+        color: #555;
+        font-weight: 600;
+    }
+    .layout-academic .section {
+        margin-bottom: 18px;
+    }
+    .layout-academic .section-h {
+        font-size: 0.95rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        border-bottom: 1px solid #ddd;
+        padding-bottom: 4px;
+        margin-bottom: 10px;
+        letter-spacing: 0.5px;
+        color: #222;
+    }
+    .layout-academic .grid-details {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+        font-size: 0.85rem;
+    }
+    .layout-academic ul {
+        margin: 5px 0 0 18px;
+        padding: 0;
+    }
+    .layout-academic li {
+        font-size: 0.85rem;
+        line-height: 1.5;
+        margin-bottom: 4px;
+        color: #444;
+    }
+
+    /* =========================================================================
+       LAYOUT 2: OLIVIA (Modern Light Sidebar - User Sample 1)
+       ========================================================================= */
+    .resume-sheet.layout-olivia {
+        display: grid;
+        grid-template-columns: 75mm 1fr;
+        height: 297mm;
+    }
+    
+    /* Watermark Initials Monogram */
+    .layout-olivia .watermark {
+        position: absolute;
+        top: 25px;
+        left: 50%;
+        transform: translateX(-50%);
+        font-size: 8rem;
+        font-weight: 900;
+        color: #f6f6f6;
+        z-index: 1;
+        font-family: serif;
+        pointer-events: none;
+    }
+
+    .layout-olivia .sidebar {
+        background: #f7f7f7;
+        border-right: 1px solid #eaeaea;
+        padding: 15mm 10mm;
+        box-sizing: border-box;
+    }
+    .layout-olivia .main-content {
+        padding: 15mm 12mm;
+        box-sizing: border-box;
+        position: relative;
+        z-index: 2;
+    }
+    .layout-olivia .name-title {
+        text-align: center;
+        margin-bottom: 12mm;
+        border-bottom: 1px solid #ddd;
+        padding-bottom: 8mm;
+        z-index: 3;
+        position: relative;
+    }
+    .layout-olivia .name-title h1 {
+        margin: 0 0 4px 0;
+        font-size: 2rem;
+        font-weight: 800;
+        color: #555;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        word-break: break-word;
+    }
+    .layout-olivia .name-title p {
+        margin: 0;
+        font-size: 0.85rem;
+        color: var(--primary-gold);
+        font-weight: 700;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+    }
+    .layout-olivia .side-heading, .layout-olivia .main-heading {
+        font-size: 0.95rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+        margin: 0 0 12px 0;
+        display: flex;
+        align-items: center;
+        color: #333;
+    }
+    .layout-olivia .side-heading::first-letter, .layout-olivia .main-heading::first-letter {
+        color: var(--primary-gold);
+        font-size: 1.2rem;
+    }
+    .layout-olivia .side-section {
+        margin-bottom: 25px;
+    }
+    .layout-olivia .main-section {
+        margin-bottom: 28px;
+    }
+    .layout-olivia .contact-item {
+        font-size: 0.8rem;
+        margin-bottom: 8px;
+        line-height: 1.4;
+        font-weight: 500;
+    }
+    .layout-olivia .contact-item strong {
+        display: block;
+        color: #777;
+        font-size: 0.72rem;
+        text-transform: uppercase;
+    }
+    .layout-olivia .skill-tag {
+        font-size: 0.8rem;
+        line-height: 1.5;
+        margin-bottom: 5px;
+        font-weight: 600;
+        color: #555;
+    }
+    .layout-olivia .summary-text {
+        font-size: 0.85rem;
+        line-height: 1.6;
+        color: #555;
+        font-weight: 500;
+    }
+
+    /* =========================================================================
+       LAYOUT 3: CATHERINE (Corporate Navy Sidebar - User Sample 2)
+       ========================================================================= */
+    .resume-sheet.layout-catherine {
+        display: grid;
+        grid-template-columns: 78mm 1fr;
+        height: 297mm;
+    }
+    .layout-catherine .sidebar {
+        background: #0f1e36; /* deep navy */
+        color: #ecf0f1;
+        padding: 15mm 10mm;
+        box-sizing: border-box;
+    }
+    .layout-catherine .main-content {
+        padding: 15mm 12mm;
+        box-sizing: border-box;
+    }
+    .layout-catherine .name-header h1 {
+        margin: 0 0 4px 0;
+        font-size: 2.1rem;
+        font-weight: 800;
+        color: #0f1e36;
+        letter-spacing: -0.5px;
+    }
+    .layout-catherine .name-header p {
+        margin: 0 0 15px 0;
+        font-size: 0.95rem;
+        color: #4b9cd3;
+        font-weight: 700;
+    }
+    .layout-catherine .name-header .summary {
+        font-size: 0.85rem;
+        line-height: 1.5;
+        color: #555;
+        margin-bottom: 25px;
+        font-weight: 500;
+    }
+    .layout-catherine .side-title {
+        font-size: 0.9rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        border-bottom: 1.5px solid rgba(255,255,255,0.15);
+        padding-bottom: 6px;
+        margin: 25px 0 12px 0;
+        letter-spacing: 1px;
+    }
+    .layout-catherine .side-title:first-of-type {
+        margin-top: 0;
+    }
+    .layout-catherine .main-title {
+        font-size: 1.05rem;
+        font-weight: 800;
+        color: #0f1e36;
+        text-transform: uppercase;
+        border-bottom: 2px solid #eee;
+        padding-bottom: 5px;
+        margin: 25px 0 15px 0;
+        letter-spacing: 0.5px;
+    }
+    .layout-catherine .contact-text {
+        font-size: 0.8rem;
+        color: #bdc3c7;
+        margin-bottom: 12px;
+        line-height: 1.4;
+        word-break: break-all;
+    }
+    .layout-catherine .contact-text strong {
+        color: white;
+        display: block;
+        font-size: 0.72rem;
+        text-transform: uppercase;
+        margin-bottom: 2px;
+    }
+    .layout-catherine .pill-badge {
+        display: inline-block;
+        background: rgba(255,255,255,0.1);
+        color: white;
+        padding: 5px 10px;
+        border-radius: 6px;
+        font-size: 0.72rem;
+        margin: 3px;
+        font-weight: 600;
+    }
+    .layout-catherine .item-row {
+        margin-bottom: 15px;
+        position: relative;
+        padding-left: 15px;
+        border-left: 2px solid #eee;
+    }
+    .layout-catherine .item-row::before {
+        content: '';
+        position: absolute;
+        left: -5px;
+        top: 4px;
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #4b9cd3;
+    }
+    .layout-catherine .item-title {
+        font-weight: 800;
+        font-size: 0.85rem;
+        color: #333;
+    }
+    .layout-catherine .item-sub {
+        font-size: 0.75rem;
+        color: #777;
+        margin-bottom: 4px;
+        font-weight: 600;
+    }
+    .layout-catherine .item-desc {
+        font-size: 0.8rem;
+        color: #555;
+        line-height: 1.4;
+    }
+
+    /* =========================================================================
+       LAYOUT 4: CREATIVE GOLD (Tech Grid)
+       ========================================================================= */
+    .resume-sheet.layout-tech {
+        padding: 18mm 15mm;
+    }
+    .layout-tech .header-grid {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: #1a1a1a;
+        color: white;
+        padding: 20px;
+        border-radius: 12px;
+        margin-bottom: 25px;
+    }
+    .layout-tech .header-grid h1 {
+        margin: 0;
+        font-size: 1.8rem;
+        font-weight: 900;
+        letter-spacing: -0.5px;
+    }
+    .layout-tech .header-grid p {
+        margin: 2px 0 0 0;
+        font-size: 0.85rem;
+        color: var(--primary-gold);
+        font-weight: 700;
+    }
+    .layout-tech .tech-stats {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+        margin-bottom: 25px;
+    }
+    .layout-tech .stat-card {
+        border: 2px solid #e2b04a;
+        border-radius: 12px;
+        padding: 12px 18px;
+        background: #fffdf6;
+    }
+    .layout-tech .stat-card h4 {
+        margin: 0;
+        font-size: 0.75rem;
+        color: #996e14;
+        text-transform: uppercase;
+        font-weight: 800;
+    }
+    .layout-tech .stat-card p {
+        margin: 4px 0 0 0;
+        font-size: 1.1rem;
+        font-weight: 800;
+        color: #1a1a1a;
+    }
+    .layout-tech .section-title {
+        font-size: 0.95rem;
+        font-weight: 900;
+        color: #1a1a1a;
+        border-bottom: 3px solid #e2b04a;
+        padding-bottom: 3px;
+        display: inline-block;
+        margin-bottom: 12px;
+        text-transform: uppercase;
+    }
+    .layout-tech .grid-3 {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 15px;
+        margin-bottom: 20px;
+    }
+    .layout-tech .desc-text {
+        font-size: 0.82rem;
+        color: #555;
+        line-height: 1.45;
+        font-weight: 500;
+    }
+
+    /* ── Print Styling Override ── */
+    @media print {
+        body {
+            background: white !important;
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+        .student-nav, .controls-row, .editor-pane, .no-print {
+            display: none !important;
+        }
+        .builder-container {
+            display: block !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            max-width: none !important;
+        }
+        .preview-pane {
+            display: block !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            background: none !important;
+            box-shadow: none !important;
+            overflow: visible !important;
+        }
+        .resume-sheet {
+            box-shadow: none !important;
+            border: none !important;
+            margin: 0 !important;
+            position: relative !important;
+            left: 0 !important;
+            top: 0 !important;
+            page-break-after: avoid;
+            page-break-inside: avoid;
+        }
+    }
+</style>
+
+<div class="controls-row no-print">
+    <div>
+        <h3 style="margin:0; font-size:1.4rem;">⚡ Resume <span>Builder & Editor</span></h3>
+        <p style="margin:4px 0 0 0; font-size:0.85rem; color:#888; font-weight:500;">
+            Customize all details and preview instantly in 4 designs.
+        </p>
+    </div>
+    
+    <div class="template-selector">
+        <button class="tmpl-btn active" onclick="setTemplate('olivia')">Olivia (Light Sidebar)</button>
+        <button class="tmpl-btn" onclick="setTemplate('catherine')">Catherine (Navy Sidebar)</button>
+        <button class="tmpl-btn" onclick="setTemplate('tech')">Creative Gold (Tech Grid)</button>
+        <button class="tmpl-btn" onclick="setTemplate('academic')">Minimalist Academic</button>
+    </div>
+
+    <div>
+        <button class="action-btn" onclick="printResume()">📥 Print / Download PDF</button>
+    </div>
+</div>
+
+<div class="builder-container">
+
+    <!-- Form Editor -->
+    <div class="editor-pane">
+        <form method="POST" action="{{ url_for('student.resume_builder') }}" id="resumeForm">
+            
+            {% with messages = get_flashed_messages() %}
+                {% if messages %}
+                    <div style="background:#e6f9ed; border-left:4px solid #2ecc71; border-radius:10px; padding:10px 14px; margin-bottom:1.5rem; font-weight:700; color:#27ae60; font-size:0.8rem;">
+                        {{ messages[0] }}
+                    </div>
+                {% endif %}
+            {% endwith %}
+
+            <div class="section-title">Personal Details</div>
+            
+            <div class="form-group">
+                <label>Full Name</label>
+                <input type="text" name="student_name" id="inName" 
+                       value="{{ student.student_name }}"
+                       onkeyup="syncPreview()">
+            </div>
+
+            <div class="form-group">
+                <label>Professional Title / Headline</label>
+                <input type="text" name="department" id="inTitle" 
+                       value="{{ student.department }} Student"
+                       onkeyup="syncPreview()">
+            </div>
+
+            <div class="section-title">Contact Information</div>
+            
+            <div class="form-group">
+                <label>Email Address</label>
+                <input type="email" name="resume_email" id="inEmail" 
+                       value="{{ student.resume_email or student.register_number.lower() + '@college.edu' }}"
+                       onkeyup="syncPreview()">
+            </div>
+
+            <div class="form-group">
+                <label>Contact Phone</label>
+                <input type="text" name="resume_phone" id="inPhone" 
+                       value="{{ student.resume_phone or '+91 98765 43210' }}"
+                       onkeyup="syncPreview()">
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>LinkedIn URL</label>
+                    <input type="text" name="resume_linkedin" id="inLinkedin" 
+                           value="{{ student.resume_linkedin or 'linkedin.com/in/' + student.student_name.lower().replace(' ', '') }}"
+                           onkeyup="syncPreview()">
+                </div>
+
+                <div class="form-group">
+                    <label>GitHub Profile</label>
+                    <input type="text" name="resume_github" id="inGithub" 
+                           value="{{ student.resume_github or 'github.com/' + student.student_name.lower().replace(' ', '') }}"
+                           onkeyup="syncPreview()">
+                </div>
+            </div>
+
+            <div class="section-title">Academic Details</div>
+
+            <div class="form-group">
+                <label>Institution Name</label>
+                <input type="text" id="inCollege" value="Coimbatore Institute of Technology" onkeyup="syncPreview()">
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>CGPA</label>
+                    <input type="text" name="cgpa" id="inCGPA" value="{{ student.cgpa }}" onkeyup="syncPreview()">
+                </div>
+                <div class="form-group">
+                    <label>Current Semester</label>
+                    <input type="number" name="current_sem" id="inSemester" value="{{ student.current_sem }}" onkeyup="syncPreview()">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Skills (Comma-separated)</label>
+                <input type="text" id="inSkills" value="Python, SQL, Data Structures, Machine Learning, Web Dev" onkeyup="syncPreview()">
+            </div>
+
+            <div class="section-title">Verified Achievements & Metrics</div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>LeetCode Solved</label>
+                    <input type="number" name="leetcode" id="inLeetCode" value="{{ student.leetcode_problems_solved }}" onkeyup="syncPreview()">
+                </div>
+                <div class="form-group">
+                    <label>CodeChef Rating</label>
+                    <input type="number" name="codechef" id="inCodeChef" value="{{ student.codechef_rating }}" onkeyup="syncPreview()">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Hackathons</label>
+                    <input type="number" name="hackathons" id="inHackathons" value="{{ student.hackathons_participated }}" onkeyup="syncPreview()">
+                </div>
+                <div class="form-group">
+                    <label>Research Papers</label>
+                    <input type="number" name="papers" id="inPapers" value="{{ student.research_papers_published }}" onkeyup="syncPreview()">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Skill Index Score (0-100)</label>
+                <input type="number" name="skill_index" id="inSkillIndex" value="{{ student.skill_index }}" onkeyup="syncPreview()">
+            </div>
+
+            <div class="form-group">
+                <label>Certifications (Comma-separated)</label>
+                <textarea name="certifications" id="inCertifications" rows="3" onkeyup="syncPreview()">{{ student.certifications_list or 'Python Essentials, Machine Learning Foundations, Cloud Practitioner' }}</textarea>
+            </div>
+
+            <div class="section-title">Summary & Experience</div>
+            
+            <div class="form-group">
+                <label>Summary Statement</label>
+                <textarea name="resume_summary" id="inSummary" rows="4" onkeyup="syncPreview()">{{ default_summary }}</textarea>
+            </div>
+
+            <div class="form-group">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                    <label style="margin:0;">Internships & Roles</label>
+                    {% if verified_internships %}
+                    <button type="button" onclick="loadVerifiedInternships()" style="background:none; border:none; color:var(--primary-gold); font-size:0.75rem; font-weight:800; cursor:pointer; padding:0; display:flex; align-items:center; gap:4px; outline:none;">
+                        ✨ Load Verified Internships
+                    </button>
+                    {% endif %}
+                </div>
+                <textarea name="resume_work_experience" id="inExperience" rows="5" onkeyup="syncPreview()">{{ student.resume_work_experience or 'Full Stack Web Developer Intern | Borcelle Solutions (Summer 2025)
+• Built responsive dashboards using Python Flask and SQLAlchemy models.
+• Accelerated search speeds by 40% with database indexing.
+
+Class Placement Coordinator | Department Representative (2024 - Present)
+• Facilitated placement schedules for 120+ student candidates.' }}</textarea>
+            </div>
+
+            {% if verified_internships %}
+            <script>
+                function loadVerifiedInternships() {
+                    const internships = [
+                        {% for intern in verified_internships %}
+                        {
+                            company: "{{ intern.company_name | escape }}",
+                            role: "{{ intern.role | escape }}",
+                            duration: "{{ intern.duration | escape }}",
+                            mode: "{{ intern.mode | escape }}",
+                            stipend: "{{ intern.stipend | escape }}"
+                        }{% if not loop.last %},{% endif %}
+                        {% endfor %}
+                    ];
+                    
+                    let text = "";
+                    internships.forEach(intern => {
+                        text += `${intern.role} | ${intern.company} (${intern.duration})\n`;
+                        text += `• Mode: ${intern.mode} | Stipend: ₹${intern.stipend}\n`;
+                        text += `• Contributed to core business tasks and projects during the internship.\n\n`;
+                    });
+                    
+                    text = text.trim();
+                    const textarea = document.getElementById('inExperience');
+                    if (textarea) {
+                        textarea.value = text;
+                        // Trigger input sync to preview pane
+                        syncPreview();
+                    }
+                }
+            </script>
+            {% endif %}
+
+            <div style="margin-top:20px;">
+                <button type="submit" class="action-btn" style="width:100%; padding:14px; background:var(--dark); color:white;">
+                    💾 Save & Sync Profile
+                </button>
+            </div>
+
+        </form>
+    </div>
+
+    <!-- Live Preview Pane -->
+    <div class="preview-pane">
+        <!-- A4 Page Container -->
+        <div id="resumeSheet" class="resume-sheet layout-olivia">
+            <!-- Olivia template gets rendered on load here -->
+        </div>
+    </div>
+
+</div>
+
+<script>
+    let currentTemplate = 'olivia';
+
+    function setTemplate(tmpl) {
+        currentTemplate = tmpl;
+
+        // Reset class list
+        const sheet = document.getElementById('resumeSheet');
+        sheet.className = 'resume-sheet';
+        sheet.classList.add('layout-' + tmpl);
+
+        // Update active class on buttons
+        document.querySelectorAll('.tmpl-btn').forEach(btn => {
+            btn.classList.remove('active');
+        });
+        
+        // Match active button by text or onclick parameters
+        const btnMap = {
+            'olivia': 0,
+            'catherine': 1,
+            'tech': 2,
+            'academic': 3
+        };
+        const btns = document.querySelectorAll('.tmpl-btn');
+        if (btns[btnMap[tmpl]]) {
+            btns[btnMap[tmpl]].classList.add('active');
+        }
+
+        // Dynamically replace structural elements
+        if (tmpl === 'olivia') {
+            sheet.innerHTML = `
+                <div class="watermark" id="oliviaWatermark">S</div>
+                <div class="sidebar">
+                    <div class="name-title">
+                        <h1 id="outName"></h1>
+                        <p id="outTitle"></p>
+                    </div>
+                    <div class="side-section">
+                        <h4 class="side-heading">Contact</h4>
+                        <div class="contact-item"><strong>Email</strong><span id="outEmail"></span></div>
+                        <div class="contact-item"><strong>Phone</strong><span id="outPhone"></span></div>
+                        <div class="contact-item"><strong>LinkedIn</strong><span id="outLinkedin"></span></div>
+                        <div class="contact-item"><strong>GitHub</strong><span id="outGithub"></span></div>
+                    </div>
+                    <div class="side-section">
+                        <h4 class="side-heading">Education</h4>
+                        <div class="contact-item" style="margin-bottom:12px;"><strong>Institution</strong><span id="outCollege"></span></div>
+                        <div class="contact-item"><strong>CGPA / Sem</strong><span id="outCGPA"></span> / Semester <span id="outSemester"></span></div>
+                    </div>
+                    <div class="side-section">
+                        <h4 class="side-heading">Platform Ratings</h4>
+                        <div class="contact-item" style="margin-bottom:8px;"><strong>LeetCode Problems</strong><span id="outLeetCode"></span> Solved</div>
+                        <div class="contact-item"><strong>CodeChef Rating</strong><span id="outCodeChef"></span></div>
+                    </div>
+                </div>
+                <div class="main-content">
+                    <div class="main-section">
+                        <h4 class="main-heading">Profile Summary</h4>
+                        <div class="summary-text" id="outSummary"></div>
+                    </div>
+                    <div class="main-section">
+                        <h4 class="main-heading">Work Experience</h4>
+                        <div class="summary-text" id="outExperience" style="white-space: pre-wrap;"></div>
+                    </div>
+                    <div class="main-section">
+                        <h4 class="main-heading">Certifications</h4>
+                        <div style="display:grid; grid-template-columns:1fr; gap:6px;" id="outCertifications"></div>
+                    </div>
+                    <div class="main-section">
+                        <h4 class="main-heading">Campus Achievements</h4>
+                        <div style="font-size:0.8rem; font-weight:600; color:#555; line-height:1.6;">
+                            • Participated in <strong id="outHackathons"></strong> campus and national hackathons.<br>
+                            • Published <strong id="outPapers"></strong> research paper(s).<br>
+                            • Assessed Skill Index Score: <strong id="outSkillIndex"></strong>.
+                        </div>
+                    </div>
+                </div>
+            `;
+        } else if (tmpl === 'catherine') {
+            sheet.innerHTML = `
+                <div class="sidebar">
+                    <div class="contact-text">
+                        <strong>Email</strong><span id="outEmail" style="color:#ecf0f1;"></span>
+                    </div>
+                    <div class="contact-text">
+                        <strong>Phone</strong><span id="outPhone" style="color:#ecf0f1;"></span>
+                    </div>
+                    <div class="contact-text">
+                        <strong>LinkedIn</strong><span id="outLinkedin" style="color:#ecf0f1;"></span>
+                    </div>
+                    <div class="contact-text">
+                        <strong>GitHub</strong><span id="outGithub" style="color:#ecf0f1;"></span>
+                    </div>
+                    
+                    <div class="side-title">Technical Skills</div>
+                    <div style="display:flex; flex-wrap:wrap; gap:4px; margin-top:5px;" id="outSkills">
+                    </div>
+                    
+                    <div class="side-title">Platform Ratings</div>
+                    <div class="contact-text"><strong>LeetCode</strong><span id="outLeetCode"></span> Solved</div>
+                    <div class="contact-text"><strong>CodeChef Rating</strong><span id="outCodeChef"></span></div>
+                </div>
+                <div class="main-content">
+                    <div class="name-header">
+                        <h1 id="outName"></h1>
+                        <p id="outTitle"></p>
+                        <div class="summary" id="outSummary"></div>
+                    </div>
+                    
+                    <div class="main-title">Work Experience</div>
+                    <div class="item-row">
+                        <div id="outExperience" style="white-space: pre-wrap; font-size:0.8rem; color:#555;"></div>
+                    </div>
+
+                    <div class="main-title">Certifications</div>
+                    <div style="font-size:0.8rem; color:#555; line-height:1.6;" id="outCertifications">
+                    </div>
+
+                    <div class="main-title">Education</div>
+                    <div class="item-row">
+                        <div class="item-title" id="outCollege"></div>
+                        <div class="item-sub"><span id="outTitleAlt"></span> | CGPA: <span id="outCGPA"></span></div>
+                        <div class="item-desc">Semester <span id="outSemester"></span></div>
+                    </div>
+                </div>
+            `;
+        } else if (tmpl === 'tech') {
+            sheet.innerHTML = `
+                <div class="header-grid">
+                    <div>
+                        <h1 id="outName"></h1>
+                        <p id="outTitle"></p>
+                    </div>
+                    <div style="text-align:right; font-size:0.8rem; font-weight:600; line-height:1.4;">
+                        <div>📧 <span id="outEmail"></span></div>
+                        <div>📞 <span id="outPhone"></span></div>
+                    </div>
+                </div>
+
+                <div class="tech-stats">
+                    <div class="stat-card">
+                        <h4>Placement Skill Index</h4>
+                        <p><span id="outSkillIndex"></span> / 100</p>
+                    </div>
+                    <div class="stat-card">
+                        <h4>Coding Profile</h4>
+                        <p>LeetCode: <span id="outLeetCode"></span> | CodeChef: <span id="outCodeChef"></span></p>
+                    </div>
+                </div>
+
+                <div style="margin-bottom:20px;">
+                    <div class="section-title">Profile Summary</div>
+                    <div class="desc-text" id="outSummary"></div>
+                </div>
+
+                <div style="margin-bottom:20px;">
+                    <div class="section-title">Projects & Experience</div>
+                    <div class="desc-text" id="outExperience" style="white-space: pre-wrap;"></div>
+                </div>
+
+                <div style="margin-bottom:20px;">
+                    <div class="section-title">Verified Certifications</div>
+                    <div class="grid-3" id="outCertifications"></div>
+                </div>
+
+                <div>
+                    <div class="section-title">Links & Handles</div>
+                    <div style="display:flex; gap:20px; font-size:0.8rem; font-weight:700;">
+                        <div>🔗 GitHub: <span id="outGithub" style="color:#555;"></span></div>
+                        <div>🔗 LinkedIn: <span id="outLinkedin" style="color:#555;"></span></div>
+                    </div>
+                </div>
+            `;
+        } else if (tmpl === 'academic') {
+            sheet.innerHTML = `
+                <div class="header">
+                    <h1 id="outName"></h1>
+                    <div class="sub-contact">
+                        <span id="outEmail"></span> | <span id="outPhone"></span> | <span id="outLinkedin"></span> | <span id="outGithub"></span>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <div class="section-h">Education</div>
+                    <div style="display:flex; justify-content:space-between; font-size:0.85rem; font-weight:700;">
+                        <span id="outCollege"></span>
+                        <span>CGPA: <span id="outCGPA"></span></span>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; font-size:0.8rem; color:#666;">
+                        <span id="outTitle"></span>
+                        <span>Semester <span id="outSemester"></span></span>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <div class="section-h">Objective</div>
+                    <div class="desc-text" id="outSummary"></div>
+                </div>
+
+                <div class="section">
+                    <div class="section-h">Projects & Internship Experience</div>
+                    <div class="desc-text" id="outExperience" style="white-space: pre-wrap;"></div>
+                </div>
+
+                <div class="section">
+                    <div class="section-h">Certifications</div>
+                    <ul id="outCertifications"></ul>
+                </div>
+
+                <div class="section">
+                    <div class="section-h">Coding Profile Summary</div>
+                    <div class="grid-details">
+                        <div><b>LeetCode Problems Solved:</b> <span id="outLeetCode"></span></div>
+                        <div><b>CodeChef Rating:</b> <span id="outCodeChef"></span></div>
+                        <div><b>Hackathons Participated:</b> <span id="outHackathons"></span></div>
+                        <div><b>Skill Index score:</b> <span id="outSkillIndex"></span></div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Sync values immediately
+        syncPreview();
+    }
+
+    // ── Live sync state from Editor inputs to Resume preview ──
+    function syncPreview() {
+        // Collect form data
+        const name = document.getElementById('inName').value;
+        const title = document.getElementById('inTitle').value;
+        const email = document.getElementById('inEmail').value;
+        const phone = document.getElementById('inPhone').value;
+        const linkedin = document.getElementById('inLinkedin').value;
+        const github = document.getElementById('inGithub').value;
+        const college = document.getElementById('inCollege').value;
+        const cgpa = document.getElementById('inCGPA').value;
+        const semester = document.getElementById('inSemester').value;
+        const skillsText = document.getElementById('inSkills').value;
+        const leetcode = document.getElementById('inLeetCode').value;
+        const codechef = document.getElementById('inCodeChef').value;
+        const hackathons = document.getElementById('inHackathons').value;
+        const papers = document.getElementById('inPapers').value;
+        const skillIndex = document.getElementById('inSkillIndex').value;
+        const certsText = document.getElementById('inCertifications').value;
+        const summary = document.getElementById('inSummary').value;
+        const experience = document.getElementById('inExperience').value;
+
+        // Apply basic text replacements
+        if (document.getElementById('outName')) document.getElementById('outName').innerText = name;
+        if (document.getElementById('outTitle')) document.getElementById('outTitle').innerText = title;
+        if (document.getElementById('outTitleAlt')) document.getElementById('outTitleAlt').innerText = title;
+        if (document.getElementById('outEmail')) document.getElementById('outEmail').innerText = email;
+        if (document.getElementById('outPhone')) document.getElementById('outPhone').innerText = phone;
+        if (document.getElementById('outLinkedin')) document.getElementById('outLinkedin').innerText = linkedin;
+        if (document.getElementById('outGithub')) document.getElementById('outGithub').innerText = github;
+        
+        if (document.getElementById('outCollege')) document.getElementById('outCollege').innerText = college;
+        if (document.getElementById('outCGPA')) document.getElementById('outCGPA').innerText = cgpa;
+        if (document.getElementById('outSemester')) document.getElementById('outSemester').innerText = semester;
+        
+        if (document.getElementById('outLeetCode')) document.getElementById('outLeetCode').innerText = leetcode;
+        if (document.getElementById('outCodeChef')) document.getElementById('outCodeChef').innerText = codechef;
+        if (document.getElementById('outHackathons')) document.getElementById('outHackathons').innerText = hackathons;
+        if (document.getElementById('outPapers')) document.getElementById('outPapers').innerText = papers;
+        if (document.getElementById('outSkillIndex')) document.getElementById('outSkillIndex').innerText = skillIndex;
+
+        if (document.getElementById('outSummary')) document.getElementById('outSummary').innerText = summary;
+        if (document.getElementById('outExperience')) document.getElementById('outExperience').innerText = experience;
+
+        // Watermark sync for Olivia
+        if (currentTemplate === 'olivia') {
+            const watermark = document.getElementById('oliviaWatermark');
+            if (watermark) {
+                watermark.innerText = name ? name.trim().charAt(0).toUpperCase() : 'S';
+            }
+        }
+
+        // Render skill tags for Catherine
+        if (currentTemplate === 'catherine') {
+            const skillsContainer = document.getElementById('outSkills');
+            if (skillsContainer) {
+                const tags = skillsText.split(',').map(t => t.trim()).filter(t => t);
+                skillsContainer.innerHTML = tags.map(tag => `<span class="pill-badge">${tag}</span>`).join('');
+            }
+        }
+
+        // Render Certifications list
+        const certsContainer = document.getElementById('outCertifications');
+        if (certsContainer) {
+            const certList = certsText.split(',').map(c => c.trim()).filter(c => c);
+            
+            if (currentTemplate === 'olivia') {
+                certsContainer.innerHTML = certList.map(c => `<div class="skill-tag">📜 ${c}</div>`).join('');
+            } else if (currentTemplate === 'catherine') {
+                certsContainer.innerHTML = certList.map(c => `<div style="margin-bottom:6px;"><b>📜 ${c}</b> - Course Certificate</div>`).join('');
+            } else if (currentTemplate === 'tech') {
+                certsContainer.innerHTML = certList.map(c => `
+                    <div style="font-size:0.72rem; background:#f9f9f9; padding:8px; border-radius:6px; border-left:3px solid #e2b04a; font-weight:700;">
+                        ${c}
+                    </div>
+                `).join('');
+            } else if (currentTemplate === 'academic') {
+                certsContainer.innerHTML = certList.map(c => `<li>${c}</li>`).join('');
+            }
+        }
+    }
+
+    // Initialize values on load
+    window.onload = function() {
+        setTemplate('olivia');
+    };
+
+    // ── Popup-window print approach (avoids blank-page bug) ──
+    function printResume() {
+        // Get the live resume sheet DOM node
+        const sheet = document.getElementById('resumeSheet');
+        if (!sheet) return;
+
+        // Collect all <style> blocks from this page
+        let allStyles = '';
+        document.querySelectorAll('style').forEach(s => {
+            allStyles += s.innerHTML;
+        });
+
+        // Build a minimal print window with the resume HTML + all styles
+        const printWin = window.open('', '_blank', 'width=900,height=1200');
+        printWin.document.open();
+        printWin.document.write(`
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Resume - ${document.getElementById('inName') ? document.getElementById('inName').value : 'Student'}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root { --primary-gold: #e2b04a; --dark: #1a1a1a; }
+        ${allStyles}
+        @page {
+            size: A4 portrait;
+            margin: 0;
+        }
+        html, body {
+            margin: 0;
+            padding: 0;
+            background: white;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+        }
+        .resume-sheet {
+            width: 210mm;
+            height: 297mm;
+            box-shadow: none !important;
+            margin: 0 !important;
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body>
+${sheet.outerHTML}
+</body>
+</html>
+        `);
+        printWin.document.close();
+
+        // Wait for fonts/images to load then trigger print
+        printWin.onload = function() {
+            setTimeout(() => {
+                printWin.focus();
+                printWin.print();
+                printWin.close();
+            }, 400);
+        };
+    }
+</script>
+
+{% endblock %}

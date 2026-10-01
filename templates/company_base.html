@@ -2,255 +2,465 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <title>{% block title %}Recruiter Portal — Chennai Institute of Technology{% endblock %}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Intelligence Hub | Admin Portal{% endblock %}</title>
-    
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
-    
     <style>
         :root {
+            --primary-navy: #0a1c33;
             --primary-gold: #e2b04a;
+            --primary-gold-hover: #c6952a;
             --white: #ffffff;
-            --bg-soft: #fcfbf7;
-            --dark: #1a1a1a;
-            --glass: rgba(255, 255, 255, 0.85);
-            --glass-border: rgba(226, 176, 74, 0.15);
-            --spring-easing: cubic-bezier(0.68, -0.6, 0.32, 1.6);
+            --bg-soft: #f4f6fa;
+            --dark: #101e30;
+            --text-muted: #64748b;
+            --glass-border: rgba(10, 28, 51, 0.06);
         }
 
         body {
             margin: 0;
             background-color: var(--bg-soft);
             font-family: 'Plus Jakarta Sans', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
             overflow-x: hidden;
-            color: var(--dark);
         }
 
-        /* Trigger Button: "Hummingbird" */
-        .hummingbird-btn {
-            position: fixed;
-            top: 25px;
-            left: 25px;
-            z-index: 2100;
+        /* ── Top Navbar ────────────────────────────────────────────────────── */
+        .nexora-navbar {
             background: var(--white);
-            border: 1px solid var(--glass-border);
-            width: 48px;
-            height: 48px;
-            border-radius: 14px;
-            cursor: pointer;
+            border-bottom: 1.5px solid var(--glass-border);
+            padding: 14px 40px;
             display: flex;
-            flex-direction: column;
+            justify-content: space-between;
             align-items: center;
-            justify-content: center;
-            gap: 5px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
-            transition: all 0.4s var(--spring-easing);
-        }
-
-        .hummingbird-btn:hover {
-            transform: scale(1.1);
-            background: var(--primary-gold);
-            border-color: var(--primary-gold);
-        }
-
-        .hummingbird-btn span {
-            display: block;
-            width: 20px;
-            height: 2px;
-            background: var(--dark);
-            border-radius: 2px;
-            transition: 0.3s;
-        }
-
-        .hummingbird-btn:hover span { background: white; }
-
-        /* Sidebar Drawer: "Wolf" */
-        .wolf-drawer {
-            position: fixed;
+            position: sticky;
             top: 0;
-            left: -320px; 
-            width: 300px;
-            height: 100vh;
-            background: var(--glass);
-            backdrop-filter: blur(25px) saturate(160%);
-            -webkit-backdrop-filter: blur(25px) saturate(160%);
-            z-index: 2000;
-            padding: 100px 25px 30px;
-            box-shadow: 25px 0 50px rgba(0,0,0,0.04);
-            border-right: 1px solid var(--glass-border);
-            transition: all 0.5s cubic-bezier(0.85, 0, 0.15, 1);
-            display: flex;
-            flex-direction: column;
+            z-index: 1000;
+            height: 70px;
+            box-sizing: border-box;
+            box-shadow: 0 4px 20px rgba(10, 28, 51, 0.02);
         }
 
-        .wolf-drawer.open { left: 0; }
-
-        /* Nav Links: "Falcon" */
-        .falcon-nav {
+        .nexora-logo-container {
             display: flex;
-            flex-direction: column;
+            align-items: center;
             gap: 10px;
-            flex-grow: 1;
         }
-
-        .falcon-link {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            padding: 16px 20px;
-            border-radius: 16px;
-            text-decoration: none;
-            color: #555;
-            font-weight: 700;
-            font-size: 0.95rem;
-            transition: all 0.3s ease;
+        .nexora-logo {
+            font-size: 1.15rem;
+            font-weight: 900;
+            color: var(--primary-navy);
+            letter-spacing: -0.5px;
+            text-transform: uppercase;
+            line-height: 1.1;
         }
-
-        .falcon-link:hover {
-            background: rgba(226, 176, 74, 0.08);
+        .nexora-logo span {
             color: var(--primary-gold);
-            transform: translateX(8px);
+            font-weight: 600;
+            font-size: 0.65rem;
+            display: block;
+            letter-spacing: 1.5px;
+            margin-top: 1px;
         }
 
-        .falcon-link.active {
-            background: var(--dark);
-            color: var(--white);
-            box-shadow: 0 15px 30px rgba(0,0,0,0.15);
+        .nav-horizontal-links {
+            display: flex;
+            gap: 24px;
+            align-items: center;
         }
-
-        .nav-icon { font-size: 1.2rem; }
-
-        /* Overlay: "Bat" */
-        .bat-overlay {
-            position: fixed;
-            top: 0;
+        .nav-horizontal-link {
+            color: #64748b;
+            font-weight: 700;
+            text-decoration: none;
+            font-size: 0.88rem;
+            transition: all 0.25s ease;
+            position: relative;
+            padding: 6px 0;
+        }
+        .nav-horizontal-link:hover, .nav-horizontal-link.active {
+            color: var(--primary-navy);
+        }
+        .nav-horizontal-link.active::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
             left: 0;
-            width: 100vw;
-            height: 100vh;
-            background: rgba(0,0,0,0.15);
-            backdrop-filter: blur(8px);
-            z-index: 1900;
-            opacity: 0;
-            visibility: hidden;
-            transition: all 0.4s ease;
+            right: 0;
+            height: 3px;
+            background: var(--primary-gold);
+            border-radius: 4px;
         }
 
-        .bat-overlay.show { opacity: 1; visibility: visible; }
-
-        /* Content Container: "Elephant" */
-        .elephant-container {
-            transition: all 0.6s cubic-bezier(0.85, 0, 0.15, 1);
-            padding-top: 20px;
-        }
-
-        .elephant-container.blur {
-            filter: blur(5px);
-            transform: scale(0.97) translateX(30px);
-            pointer-events: none;
-        }
-
-        /* Badge/Profile: "Owl" */
-        .owl-profile {
-            padding: 20px;
-            background: var(--white);
-            border-radius: 20px;
-            border: 1px solid var(--glass-border);
+        .user-profile-badge {
             display: flex;
             align-items: center;
             gap: 12px;
-            margin-top: auto;
+            border-left: 1.5px solid var(--glass-border);
+            padding-left: 20px;
+        }
+        .avatar-circle {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: var(--primary-navy);
+            color: var(--white);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 0.9rem;
+        }
+        .user-info {
+            display: flex;
+            flex-direction: column;
+            line-height: 1.2;
+        }
+        .user-info .name {
+            font-size: 0.88rem;
+            font-weight: 800;
+            color: var(--primary-navy);
+        }
+        .user-info .role {
+            font-size: 0.72rem;
+            color: #94a3b8;
+            font-weight: 600;
+        }
+
+        /* ── Main Layout Wrapper ───────────────────────────────────────────── */
+        .nexora-layout-body {
+            display: flex;
+            flex: 1;
+            min-height: calc(100vh - 70px);
+        }
+
+        /* Left Permanent Sidebar */
+        .nexora-sidebar {
+            width: 260px;
+            background: var(--primary-navy);
+            display: flex;
+            flex-direction: column;
+            padding: 30px 0;
+            box-sizing: border-box;
+            border-right: 1px solid rgba(255, 255, 255, 0.05);
+            flex-shrink: 0;
+        }
+
+        .sidebar-menu {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            padding: 0 0 30px 0;
+            flex: 1;
+        }
+        .sidebar-heading {
+            font-size: 0.72rem;
+            font-weight: 800;
+            color: rgba(226, 176, 74, 0.65);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            padding: 0 24px;
+            margin-bottom: 12px;
+        }
+        .sidebar-link {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 24px;
+            color: rgba(255, 255, 255, 0.75);
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 0.88rem;
+            border-left: 4px solid transparent;
+            transition: all 0.25s ease;
+        }
+        .sidebar-link:hover {
+            color: var(--primary-gold);
+            background: rgba(255, 255, 255, 0.03);
+            border-left-color: var(--primary-gold);
+        }
+        .sidebar-link.active {
+            color: var(--primary-gold);
+            background: rgba(226, 176, 74, 0.08);
+            border-left-color: var(--primary-gold);
+        }
+        .sidebar-icon {
+            font-size: 1.15rem;
+        }
+
+        /* Quick Actions Container (Bottom of Sidebar) */
+        .quick-actions-box {
+            margin: auto 15px 0 15px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 16px;
+            padding: 18px;
+        }
+        .quick-actions-heading {
+            font-size: 0.7rem;
+            font-weight: 800;
+            color: var(--primary-gold);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 12px;
+            display: block;
+        }
+        .quick-action-btn {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 10px 14px;
+            border-radius: 10px;
+            color: white;
+            text-decoration: none;
+            font-size: 0.8rem;
+            font-weight: 700;
+            transition: all 0.25s ease;
+            margin-bottom: 8px;
+        }
+        .quick-action-btn:last-child { margin-bottom: 0; }
+        .quick-action-btn:hover {
+            background: var(--primary-gold);
+            color: var(--primary-navy);
+            transform: translateY(-1px);
+        }
+
+        /* Right Content Pane */
+        .nexora-content-pane {
+            flex: 1;
+            padding: 40px;
+            box-sizing: border-box;
+            background-color: var(--bg-soft);
+            overflow-y: auto;
         }
     </style>
+    <script>if(localStorage.getItem('ssms_dark_mode')==='1'){document.documentElement.classList.add('dark-mode');document.addEventListener('DOMContentLoaded',function(){document.body.classList.add('dark-mode');})}</script>
 </head>
 <body>
 
-{% if session.admin_user %}
-    <button id="menuToggle" class="hummingbird-btn">
-        <span></span>
-        <span style="width: 12px; align-self: flex-start; margin-left: 13px;"></span>
-        <span></span>
-    </button>
+<!-- Page Preloader -->
+<div id="page-preloader" style="
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #f4f6fa;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 999999;
+    transition: opacity 0.4s ease, visibility 0.4s ease;
+">
+    <div style="text-align: center;">
+        <svg viewBox="0 0 100 105" xmlns="http://www.w3.org/2000/svg" style="
+            width: 80px;
+            height: 80px;
+            color: #e2b04a;
+            animation: pulse-spark 1.8s infinite ease-in-out, preloader-glow 1.8s infinite ease-in-out;
+        ">
+            <!-- Top-Right Spark -->
+            <path d="M 62,8 Q 62,38 92,38 Q 62,38 62,68 Q 62,38 32,38 Q 62,38 62,8 Z" fill="currentColor" />
+            <!-- Bottom-Left Spark -->
+            <path d="M 38,37 Q 38,67 68,67 Q 38,67 38,97 Q 38,67 8,67 Q 38,67 38,37 Z" fill="currentColor" style="opacity: 0.85;" />
+        </svg>
+    </div>
+</div>
 
-    <aside id="sidebar" class="wolf-drawer">
-        <div style="margin-bottom: 40px; padding-left: 20px;">
-            <span style="color: var(--primary-gold); font-weight: 800; text-transform: uppercase; letter-spacing: 2px; font-size: 0.7rem;">Intelligence Hub</span>
-        </div>
-
-        <nav class="falcon-nav">
-            <a href="{{ url_for('admin.dashboard') }}" class="falcon-link {% if request.endpoint == 'dashboard' %}active{% endif %}">
-                <span class="nav-icon">🏠</span>
-                <span>Dashboard</span>
-            </a>
-            <a href="{{ url_for('admin.add_students') }}" class="falcon-link {% if request.endpoint == 'add_students' %}active{% endif %}">
-                <span class="nav-icon">➕</span>
-                <span>Add Students</span>
-            </a>
-            <a href="{{ url_for('admin.view_students') }}" class="falcon-link {% if request.endpoint == 'view_students' %}active{% endif %}">
-                <span class="nav-icon">👥</span>
-                <span>View Students</span>
-            </a>
-            <a href="{{ url_for('admin.admin_test_results') }}" class="falcon-link {% if request.endpoint == 'admin_test_results' %}active{% endif %}">
-                <span class="nav-icon">📘</span>
-                <span>Test Results</span>
-            </a>
-            <a href="{{ url_for('admin.drives') }}" class="falcon-link {% if request.endpoint == 'drives' %}active{% endif %}">
-                <span class="nav-icon">💼</span>
-                <span>Company Drives</span>
-            </a>
-        </nav>
-
-        <div class="owl-profile">
-            <div style="width: 35px; height: 35px; background: var(--primary-gold); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;">
-                {{ session.admin_user[0] | upper }}
-            </div>
-            <div style="overflow: hidden;">
-                <p style="margin: 0; font-weight: 800; font-size: 0.8rem;">{{ session.admin_user }}</p>
-                <p style="margin: 0; font-size: 0.65rem; color: #888;">Administrator</p>
-            </div>
-        </div>
-    </aside>
-
-    <div id="overlay" class="bat-overlay"></div>
-{% endif %}
-
-<main class="elephant-container" id="mainContent">
-    {% block content %}{% endblock %}
-</main>
+<style>
+    @keyframes pulse-spark {
+        0%, 100% { transform: scale(0.85) rotate(-8deg); }
+        50% { transform: scale(1.05) rotate(8deg); }
+    }
+    @keyframes preloader-glow {
+        0%, 100% { filter: drop-shadow(0 0 8px rgba(226,176,74,0.2)); }
+        50% { filter: drop-shadow(0 0 25px rgba(226,176,74,0.6)); }
+    }
+    html.dark-mode #page-preloader {
+        background-color: #0a121e !important;
+    }
+</style>
 
 <script>
-    const menuBtn = document.getElementById("menuToggle");
-    const sidebar = document.getElementById("sidebar");
-    const overlay = document.getElementById("overlay");
-    const mainContent = document.getElementById("mainContent");
+    window.addEventListener('load', function() {
+        const preloader = document.getElementById('page-preloader');
+        if (preloader) {
+            preloader.style.opacity = '0';
+            preloader.style.visibility = 'hidden';
+            setTimeout(() => { preloader.remove(); }, 400);
+        }
+    });
+</script>
 
-    if (menuBtn) {
-        const toggleMenu = () => {
-            sidebar.classList.toggle("open");
-            overlay.classList.toggle("show");
-            mainContent.classList.toggle("blur");
-            
-            // Icon transformation
-            const spans = menuBtn.querySelectorAll('span');
-            if(sidebar.classList.contains('open')) {
-                spans[1].style.opacity = "0";
-                spans[0].style.transform = "translateY(7px) rotate(45deg)";
-                spans[2].style.transform = "translateY(-7px) rotate(-45deg)";
-                spans[0].style.background = "white";
-                spans[2].style.background = "white";
-            } else {
-                spans[1].style.opacity = "1";
-                spans[0].style.transform = "none";
-                spans[2].style.transform = "none";
-                spans[0].style.background = "";
-                spans[2].style.background = "";
+    {% if session.company_email %}
+    <!-- Sticky Top Navbar -->
+    <header class="nexora-navbar">
+        <div class="nexora-logo-container">
+            <span style="font-size: 1.6rem;">🎓</span>
+            <div class="nexora-logo">
+                Chennai Institute of Technology
+                <span>Learn • Lead • Inspire</span>
+            </div>
+        </div>
+
+        <nav class="nav-horizontal-links">
+            <a href="{{ url_for('company.company_dashboard') }}" class="nav-horizontal-link {% if request.endpoint in ['company_dashboard', 'dashboard'] %}active{% endif %}">Dashboard</a>
+            <a href="{{ url_for('company.create_drive') }}" class="nav-horizontal-link {% if request.endpoint == 'create_drive' %}active{% endif %}">Post New Job</a>
+            <a href="{{ url_for('company.company_logout') }}" style="color: #ef4444;" class="nav-horizontal-link">Logout</a>
+        </nav>
+
+        <div style="display:flex; align-items:center; gap:12px;">
+            <!-- Language Selector -->
+            <select id="ssmsLangSelect" onchange="changeLanguage(this.value)" style="
+                background: #ffffff;
+                border: 1.5px solid rgba(226,176,74,0.25);
+                padding: 6px 10px;
+                border-radius: 12px;
+                font-size: 0.78rem;
+                font-weight: 800;
+                color: #0a1c33;
+                outline: none;
+                cursor: pointer;
+                font-family: inherit;
+                transition: all 0.25s ease;
+            ">
+                <option value="en">🇬🇧 EN</option>
+                <option value="ta">🇮🇳 தமிழ்</option>
+                <option value="hi">🇮🇳 हिन्दी</option>
+            </select>
+
+            <div class="user-profile-badge">
+                <div class="avatar-circle">H</div>
+                <div class="user-info">
+                    <span class="name">{{ session.company_name }}</span>
+                    <span class="role">Recruiter Workspace</span>
+                </div>
+            </div>
+        </div>
+    </header>
+    {% endif %}
+
+    <div class="nexora-layout-body">
+        {% if session.company_email %}
+        <!-- Permanent Left Sidebar -->
+        <aside class="nexora-sidebar">
+            <div class="sidebar-menu">
+                <span class="sidebar-heading">Recruitment Desk</span>
+                
+                <a href="{{ url_for('company.company_dashboard') }}" class="sidebar-link {% if request.endpoint in ['company_dashboard', 'dashboard'] %}active{% endif %}">
+                    <span class="sidebar-icon">🏠</span> Active Drives
+                </a>
+                <a href="{{ url_for('company.create_drive') }}" class="sidebar-link {% if request.endpoint == 'create_drive' %}active{% endif %}">
+                    <span class="sidebar-icon">➕</span> Create Career Drive
+                </a>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="quick-actions-box">
+                <span class="quick-actions-heading">Support Desk</span>
+                <a href="mailto:placements@citchennai.edu.in" class="quick-action-btn">
+                    <span>✉ Contact Office</span> <span>→</span>
+                </a>
+                <a href="{{ url_for('company.company_logout') }}" class="quick-action-btn" style="background: rgba(239, 68, 68, 0.1); border-color: rgba(239, 68, 68, 0.2); color: #ef4444;">
+                    <span>🚪 Logout Session</span> <span>→</span>
+                </a>
+            </div>
+        </aside>
+        {% endif %}
+
+        <!-- Right Content Area -->
+        <main class="nexora-content-pane">
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+
+    <!-- Dark Mode Toggle -->
+    <button class="dm-toggle" id="dmToggle" title="Toggle Dark Mode" aria-label="Toggle dark mode">🌙</button>
+
+    <script>
+        (function() {
+            const body = document.body;
+            const btn  = document.getElementById('dmToggle');
+            const KEY  = 'ssms_dark_mode';
+
+            if (localStorage.getItem(KEY) === '1') {
+                body.classList.add('dark-mode');
+                if (btn) btn.textContent = '☀️';
+            }
+
+            if (btn) {
+                btn.addEventListener('click', function () {
+                    body.classList.toggle('dark-mode');
+                    const isDark = body.classList.contains('dark-mode');
+                    btn.textContent = isDark ? '☀️' : '🌙';
+                    localStorage.setItem(KEY, isDark ? '1' : '0');
+                    btn.style.transform = 'scale(0.85) rotate(20deg)';
+                    setTimeout(() => { btn.style.transform = ''; }, 200);
+                });
+            }
+        })();
+    </script>
+
+    <script>
+        const TRANSLATIONS_COMPANY = {
+            'ta': {
+                'Dashboard': 'டாஷ்போர்டு',
+                'Post New Job': 'புதிய வேலை இடுக',
+                'Logout': 'வெளியேறு',
+                'Recruiter Workspace': 'நிறுவன பணியிடம்',
+                'My Active Drives': 'எனது செயலில் உள்ள முகாம்கள்',
+                'Post a Drive': 'முகாமை இடுக',
+                'Candidate Search': 'வேட்பாளர் தேடல்',
+                'Search Results': 'தேடல் முடிவுகள்',
+                'Company Dashboard': 'நிறுவன டாஷ்போர்டு',
+                'No active drives yet': 'இன்னும் செயலில் உள்ள முகாம்கள் இல்லை'
+            },
+            'hi': {
+                'Dashboard': 'डैशबोर्ड',
+                'Post New Job': 'नई नौकरी पोस्ट करें',
+                'Logout': 'लॉगआउट',
+                'Recruiter Workspace': 'भर्तीकर्ता कार्यक्षेत्र',
+                'My Active Drives': 'मेरे सक्रिय ड्राइव',
+                'Post a Drive': 'ड्राइव पोस्ट करें',
+                'Candidate Search': 'उम्मीदवार खोज',
+                'Search Results': 'खोज परिणाम',
+                'Company Dashboard': 'कंपनी डैशबोर्ड',
+                'No active drives yet': 'अभी तक कोई सक्रिय ड्राइव नहीं'
             }
         };
 
-        menuBtn.onclick = toggleMenu;
-        overlay.onclick = toggleMenu;
-    }
-</script>
+        function changeLanguage(lang) {
+            localStorage.setItem('ssms_current_lang', lang);
+            window.location.reload();
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const langSelect = document.getElementById('ssmsLangSelect');
+            const lang = localStorage.getItem('ssms_current_lang') || 'en';
+            if (langSelect) langSelect.value = lang;
+
+            if (lang !== 'en') {
+                const dict = TRANSLATIONS_COMPANY[lang];
+                if (dict) {
+                    function traverse(node) {
+                        if (node.nodeName === 'SCRIPT' || node.nodeName === 'STYLE' ||
+                            node.nodeName === 'SELECT' || node.nodeName === 'OPTION') return;
+                        if (node.nodeType === Node.TEXT_NODE) {
+                            const text = node.textContent.trim();
+                            if (dict[text]) node.textContent = node.textContent.replace(text, dict[text]);
+                        } else {
+                            for (const child of node.childNodes) traverse(child);
+                        }
+                    }
+                    traverse(document.body);
+                }
+            }
+        });
+    </script>
 
 </body>
 </html>
